@@ -41,7 +41,7 @@ export default {
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
-    extend(config, { isDev, isClient }) {
+    extend(config, { isDev = false, isClient = true }) {
       
         config.module.rules.push(
           {
@@ -49,7 +49,7 @@ export default {
               loader: "shader-loader",
               options: {
                   glsl: {
-                      chunkPath: "/assets/shaders/chunks"
+                      chunkPath: "/shaders/chunks"
                   }
               }
           }
