@@ -1,4 +1,6 @@
+#ifdef GL_OES_standard_derivatives
 #extension GL_OES_standard_derivatives : enable
+#endif
 // Variable qualifiers that come with the shader
 precision highp float;
 uniform float opacity;
