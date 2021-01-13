@@ -44,13 +44,16 @@ export default class WebGLFont {
     this.camera.position.z = this.vars.zoom;
 
     // Renderer
-    this.renderer = new THREE.WebGLRenderer({
+    this.renderer = new THREE.WebGL1Renderer({
       canvas: document.querySelector("#app"),
       antialias: true
     });
     this.renderer.setClearColor(background);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
+    // this.renderer.context.getExtension("OES_standard_derivatives");
+    // console.log("log : ", this.renderer.context.getExtension);
+    // console.log("loog : ", this.renderer);
 
     // Clock
     this.clock = new THREE.Clock();
