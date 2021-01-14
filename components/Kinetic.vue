@@ -1,7 +1,5 @@
 <template>
 	<div>
-		<!-- <p>hey</p> -->
-		<div id="torus"></div>
 		<canvas id="app"></canvas>
 	</div>
 </template>
@@ -11,7 +9,7 @@
 	import WebGLFont from "@/components/WebGLFont/WebGLFont";
 	import { shaders } from "@/components/WebGLFont/shaders";
 
-	import Gl from "@/components/WebGLFont/WebGLFontPlayground.js";
+	// import Gl from "@/components/WebGLFont/WebGLFontPlayground.js";
 
 	// import * as THREE from 'three';
 	// global.THREE = THREE;
@@ -24,14 +22,14 @@
 		},
 		mounted(){
 
-			// const type = new WebGLFont({
-			// 	word: "Hey boiiii",
-			// 	position: [-90, -10, 0],
-			// 	rotation: [Math.PI, 0, 0],
-			// 	zoom: 150,
-			// 	vertex: shaders[0].vertex,
-			// 	fragment: shaders[0].fragment
-			// });
+			const type = new WebGLFont({
+				word: "Hey boiiii",
+				position: [-90, -10, 0],
+				rotation: [Math.PI, 0, 0],
+				zoom: 150,
+				vertex: shaders.vertex[0],
+				fragment: shaders.fragment[0]
+			});
 
 			// - -  2nd version
 
@@ -46,9 +44,9 @@
 
 			// - - - 3rd version
 
-			const gl = new Gl();
-			
-			gl.init();
+			// const gl = new Gl();
+
+			// gl.init();
 
 		}
 

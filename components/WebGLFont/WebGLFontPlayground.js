@@ -13,7 +13,9 @@ const MSDFShader = require("three-bmfont-text/shaders/msdf");
 const shaders = require("./torus.js");
 
 export default class {
-  constructor() {
+  constructor(text) {
+
+    this.printText = text;
     this.renderer = new THREE.WebGL1Renderer({
       alpha: true
     });
@@ -43,7 +45,7 @@ export default class {
     loadFont("/font/typetest.fnt", (err, font) => {
       this.fontGeometry = createGeometry({
         font,
-        text: "ENDLESS"
+        text: this.printText
       });
 
       // Load texture containing font glyps

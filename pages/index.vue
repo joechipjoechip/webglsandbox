@@ -1,72 +1,43 @@
 <template>
-	<div class="container">
-		<!-- <div>
-			<Logo />
-			<h1 class="title">kinetic</h1>
-			<div class="links">
-				<a
-				href="https://nuxtjs.org/"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="button--green"
-				>
-				Documentation
-				</a>
-				<a
-				href="https://github.com/nuxt/nuxt.js"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="button--grey"
-				>
-				GitHub
-				</a>
-			</div>
-		</div> -->
-
-		<Kinetic/>
+	<div class="index-container">
+		<nav>
+			<router-link to="/torus">torus</router-link>
+			<router-link to="/kinetic">kinetic</router-link>
+		</nav>
 	</div>
 </template>
 
 <script>
-
-	import Kinetic from "@/components/Kinetic.vue";
 	
 	export default {
-		components: {
-			Kinetic
-		}
+
 	}
+
 </script>
 
-<style>
-.container {
-margin: 0 auto;
-min-height: 100vh;
-display: flex;
-justify-content: center;
-align-items: center;
-text-align: center;
-}
+<style lang="scss" scoped>
 
-.title {
-font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
-	'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-display: block;
-font-weight: 300;
-font-size: 100px;
-color: #35495e;
-letter-spacing: 1px;
-}
+	.index-container {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		height: 100vh;
+	}
 
-.subtitle {
-font-weight: 300;
-font-size: 42px;
-color: #526488;
-word-spacing: 5px;
-padding-bottom: 15px;
-}
+	nav {
+		display: block;
+		width: 80%;
+		margin: 0 auto;
+		text-align: center;
 
-.links {
-padding-top: 15px;
-}
+		& > * {
+			text-transform: capitalize;
+			margin-left: 40px;
+
+			&:first-of-type {
+				margin-left: 0;
+			}
+		}
+	}
+
 </style>
