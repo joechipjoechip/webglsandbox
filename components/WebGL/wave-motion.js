@@ -37,66 +37,48 @@ class Wave {
 	}
 
 	init() {
-
 		this.createMesh();
-
 		this.addEvents();
-
 	}
 
 	createMesh() {
 		this.geometry = new THREE.PlaneGeometry(0.4, 0.6, 16, 16);
-
 		this.material = new THREE.ShaderMaterial({
 			vertexShader,
 			fragmentShader,
 			uniforms: {
-				uTime: { value: 0.0 }
+			uTime: { value: 0.0 }
 			},
 			wireframe: true,
 			side: THREE.DoubleSide
 		});
-
 		this.mesh = new THREE.Mesh(this.geometry, this.material);
-
 		this.scene.add(this.mesh);
-
 	}
 
 	addEvents() {
-
 		window.requestAnimationFrame(this.run.bind(this));
-
 		window.addEventListener("resize", this.onResize.bind(this), false);
-
 	}
 
 	run() {
-
 		requestAnimationFrame(this.run.bind(this));
-
 		this.render();
-
 	}
 
 	render() {
-
+		this.material.uniforms.uTime.value = this.clock.getElapsedTime();
 		this.renderer.render(this.scene, this.camera);
-
 	}
 
 	onResize() {
-
 		const w = window.innerWidth;
-
 		const h = window.innerHeight;
 
 		this.camera.aspect = w / h;
-
 		this.camera.updateProjectionMatrix();
 
 		this.renderer.setSize(w, h);
-		
 	}
 }
 

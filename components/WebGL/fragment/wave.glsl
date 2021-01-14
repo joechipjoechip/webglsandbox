@@ -1,5 +1,8 @@
-precision mediump float;
+#ifdef GL_OES_standard_derivatives
+#extension GL_OES_standard_derivatives : enable
+#endif
 
+precision mediump float;
 varying vec2 vUv;
 
 void main() {
