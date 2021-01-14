@@ -1,7 +1,6 @@
 <template>
 	<div>
 		<canvas ref="wavecanvas"></canvas>
-		hey wave component
 	</div>
 </template>
 

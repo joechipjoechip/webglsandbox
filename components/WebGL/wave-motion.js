@@ -39,6 +39,19 @@ class Wave {
 
 		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
+		this.controls.enableZoom = false;
+
+		// Vertical
+		// Range is 0 to Math.PI radians.
+		// https://up2school.com/fr/article/mathematiques/le-cercle-trigonometrique/
+		this.controls.minPolarAngle = Math.PI / 3;
+		this.controls.maxPolarAngle = (2 * Math.PI) / 3;
+
+		// Horizontal
+		// If set, must be a sub-interval of the interval [ - Math.PI, Math.PI ].
+		this.controls.minAzimuthAngle = Math.PI / - 5;
+		this.controls.maxAzimuthAngle = Math.PI / 5;
+
 		this.onResize();
 
 	}
