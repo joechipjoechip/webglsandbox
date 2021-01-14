@@ -7,74 +7,97 @@ import vertexShader from "./vertex/wave.glsl";
 import fragmentShader from "./fragment/wave.glsl";
 
 class Wave {
-  constructor(myCanvas) {
-    this.scene = new THREE.Scene();
+	constructor(myCanvas) {
+		this.scene = new THREE.Scene();
 
-    this.camera = new THREE.PerspectiveCamera(
-      45,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      100
-    );
+		this.camera = new THREE.PerspectiveCamera(
+			45,
+			window.innerWidth / window.innerHeight,
+			0.1,
+			100
+		);
 
-    this.camera.position.z = 1;
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: myCanvas,
-      antialias: true
-    });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setClearColor(0xffffff, 1);
+		this.camera.position.z = 1;
 
-    this.clock = new THREE.Clock();
+		this.renderer = new THREE.WebGLRenderer({
+			canvas: myCanvas,
+			antialias: true
+		});
 
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+		this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    this.onResize();
-  }
+		this.renderer.setClearColor(0xffffff, 1);
 
-  init() {
-    this.createMesh();
-    this.addEvents();
-  }
+		this.clock = new THREE.Clock();
 
-  createMesh() {
-    this.geometry = new THREE.PlaneGeometry(0.4, 0.6, 16, 16);
-    this.material = new THREE.ShaderMaterial({
-      vertexShader,
-      fragmentShader,
-      uniforms: {
-        uTime: { value: 0.0 }
-      },
-      wireframe: true,
-      side: THREE.DoubleSide
-    });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.scene.add(this.mesh);
-  }
+		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
-  addEvents() {
-    window.requestAnimationFrame(this.run.bind(this));
-    window.addEventListener("resize", this.onResize.bind(this), false);
-  }
+		this.onResize();
 
-  run() {
-    requestAnimationFrame(this.run.bind(this));
-    this.render();
-  }
+	}
 
-  render() {
-    this.renderer.render(this.scene, this.camera);
-  }
+	init() {
 
-  onResize() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+		this.createMesh();
 
-    this.camera.aspect = w / h;
-    this.camera.updateProjectionMatrix();
+		this.addEvents();
 
-    this.renderer.setSize(w, h);
-  }
+	}
+
+	createMesh() {
+		this.geometry = new THREE.PlaneGeometry(0.4, 0.6, 16, 16);
+
+		this.material = new THREE.ShaderMaterial({
+			vertexShader,
+			fragmentShader,
+			uniforms: {
+				uTime: { value: 0.0 }
+			},
+			wireframe: true,
+			side: THREE.DoubleSide
+		});
+
+		this.mesh = new THREE.Mesh(this.geometry, this.material);
+
+		this.scene.add(this.mesh);
+
+	}
+
+	addEvents() {
+
+		window.requestAnimationFrame(this.run.bind(this));
+
+		window.addEventListener("resize", this.onResize.bind(this), false);
+
+	}
+
+	run() {
+
+		requestAnimationFrame(this.run.bind(this));
+
+		this.render();
+
+	}
+
+	render() {
+
+		this.renderer.render(this.scene, this.camera);
+
+	}
+
+	onResize() {
+
+		const w = window.innerWidth;
+
+		const h = window.innerHeight;
+
+		this.camera.aspect = w / h;
+
+		this.camera.updateProjectionMatrix();
+
+		this.renderer.setSize(w, h);
+		
+	}
 }
 
 export default Wave;
