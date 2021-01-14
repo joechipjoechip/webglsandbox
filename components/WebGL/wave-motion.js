@@ -6,8 +6,15 @@ import vertexShader from "./vertex/wave.glsl";
 
 import fragmentShader from "./fragment/wave.glsl";
 
+
+
 class Wave {
-	constructor(myCanvas) {
+	constructor(myCanvas, imgPath) {
+
+		this.imgPath = imgPath;
+
+		console.log("hey : ", this.imgPath);
+
 		this.scene = new THREE.Scene();
 
 		this.camera = new THREE.PerspectiveCamera(
@@ -43,22 +50,39 @@ class Wave {
 
 	createMesh() {
 		this.geometry = new THREE.PlaneGeometry(0.4, 0.6, 16, 16);
+
 		this.material = new THREE.ShaderMaterial({
 			vertexShader,
 			fragmentShader,
 			uniforms: {
-			uTime: { value: 0.0 }
+				uTime: { value: 0.0 },
+				uTexture: { value: new THREE.TextureLoader().load(this.imgPath) },
 			},
-			wireframe: true,
+			// wireframe: true,
 			side: THREE.DoubleSide
 		});
+
+		// this.material = new THREE.ShaderMaterial({
+		// 	vertexShader,
+		// 	fragmentShader,
+		// 	uniforms: {
+		// 	  uTime: { value: 0.0 },
+		// 	  uTexture: { value: new THREE.TextureLoader().load(img) },
+		// 	},
+		//   });
+
 		this.mesh = new THREE.Mesh(this.geometry, this.material);
+
 		this.scene.add(this.mesh);
+
 	}
 
 	addEvents() {
+
 		window.requestAnimationFrame(this.run.bind(this));
+
 		window.addEventListener("resize", this.onResize.bind(this), false);
+
 	}
 
 	run() {

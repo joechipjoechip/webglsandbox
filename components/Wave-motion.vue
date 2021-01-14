@@ -9,6 +9,8 @@
 
 	import Wave from "./WebGL/wave-motion.js";
 
+	// import img from "./images/texture.jpg";
+
 	export default {
 		data(){
 			return {
@@ -17,7 +19,7 @@
 		},
 		mounted(){
 
-			const scene = new Wave(this.$refs.wavecanvas);
+			const scene = new Wave(this.$refs.wavecanvas, "/images/texture.jpg");
 
 			scene.init();
 
