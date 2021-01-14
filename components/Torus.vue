@@ -7,7 +7,7 @@
 
 <script>
 
-	import Gl from "@/components/WebGLFont/WebGLFontPlayground.js";
+	import Gl from "@/components/WebGL/WebGLFontPlayground.js";
 
 	export default {
 		deta(){

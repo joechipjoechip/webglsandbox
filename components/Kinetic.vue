@@ -6,10 +6,10 @@
 
 <script>
 
-	import WebGLFont from "@/components/WebGLFont/WebGLFont";
-	import { shaders } from "@/components/WebGLFont/shaders";
+	import WebGLFont from "@/components/WebGL/WebGLFont";
+	import { shaders } from "@/components/WebGL/shaders";
 
-	// import Gl from "@/components/WebGLFont/WebGLFontPlayground.js";
+	// import Gl from "@/components/WebGL/WebGLFontPlayground.js";
 
 	// import * as THREE from 'three';
 	// global.THREE = THREE;

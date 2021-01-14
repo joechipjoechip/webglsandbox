@@ -3,6 +3,7 @@
 		<nav>
 			<router-link to="/torus">torus</router-link>
 			<router-link to="/kinetic">kinetic</router-link>
+			<router-link to="/wave-motion">wave-motion</router-link>
 		</nav>
 	</div>
 </template>
