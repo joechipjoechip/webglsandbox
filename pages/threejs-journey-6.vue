@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<canvas class="webgl" ref="canvas"></canvas>
-		<p>hey three journey 5, geometries</p>
+		<p>hey three journey 6, debug ui</p>
 	</div>
 </template>
 
@@ -9,10 +9,20 @@
 
 	import * as THREE from 'three';
 
+	import gsap from 'gsap';
+
+	import * as dat from 'dat.gui';
+
+	console.log("hey dat : ", dat);
+
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 	export default {
 		mounted(){
+
+			this.animation = {
+				run: true
+			};
 
 			this.init();
 
@@ -99,53 +109,39 @@
 
 
 
+
+				// DAT.GUI
+				// de base:
+				// const gui = new dat.GUI();
+				// mais aussi
+				const gui = new dat.GUI({
+					closed: true,
+					width: 400
+				});
+
+				// gui.hide();
+				// le gui sera caché de base, pour l'afficher il faudra taper "h"
+
+
+
+
+				const parameters = {
+					color: 0xff0000,
+					spin: () => {
+						console.log("spinn triggered");
+						gsap.to(mesh.rotation, {
+							duration: 2,
+							y: mesh.rotation.y + 10
+						});
+					}
+				};
+
+
+
+
+
 				// Scene
 				const scene = new THREE.Scene();
-
-				// // Positions
-
-				// // const positionsArray = new Float32Array(9);
-
-				// // positionsArray[0] = 0;
-				// // positionsArray[1] = 0;
-				// // positionsArray[2] = 0;
-
-				// // positionsArray[3] = 0;
-				// // positionsArray[4] = 1;
-				// // positionsArray[5] = 0;
-
-				// // positionsArray[6] = 1;
-				// // positionsArray[7] = 0;
-				// // positionsArray[8] = 0;
-
-				// // est strictement équivalent à
-
-				// const positionsArray = new Float32Array([
-				// 	0, 0, 0,
-				// 	0, 1, 0,
-				// 	1, 0, 0
-				// ]);
-
-				// // et on continue :
-				// const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3);
-				// // 3 étant le nombres de coordonnées pour 1 seul vertex
-
-				// const geometry = new THREE.BufferGeometry();
-				// geometry.setAttribute("positions", positionsAttribute);
-
-
-				// // Material
-				// const material = new THREE.MeshBasicMaterial({
-				// 		color: 0xff0000,
-				// 		wireframe: true 
-				// });
-
-				// const mesh = new THREE.Mesh(geometry, material);
-
-
-				// scene.add(mesh);
-
-
 
 
 				// mais reprenons tout ça, écrivons le autrement : 
@@ -164,7 +160,7 @@
 
 				// Material
 				const material = new THREE.MeshBasicMaterial({
-					color: 0xff0000,
+					color: parameters.color,
 					wireframe: true 
 				});
 
@@ -218,11 +214,54 @@
 
 					console.log("requestAnim is triggerd");
 
-					// window.requestAnimationFrame(tick);
+					this.animation.run && window.requestAnimationFrame(tick);
 
 				};
 
-				tick();
+				this.animation.run && tick();
+
+
+				// ADD DEBUG GUI
+				// params : globalObject, specificKey, min, max, steps
+				// gui.add(mesh.position, "x", -3, 3, 0.01);
+				// strictement identique à
+				// gui.add(mesh.position, "y").min(-3).max(3).step(0.01);
+
+				// donc on peut faire : 
+				gui
+					.add(mesh.position, "y")
+					.min(-3)
+					.max(3)
+					.step(0.01)
+					.name("élévation");
+
+				// maintenant voyons pour un boolean
+				// -> mesh.visible
+				gui
+					.add(mesh, "visible");
+
+				// autre essai boolean
+				gui
+					.add(material, "wireframe");
+
+				gui
+					.add(this.animation, "run")
+					.name("run animation");
+
+				// maintenant : les couleurs (voir l'obj parameters, plus haut)
+				gui
+					.addColor(parameters, "color")
+					.onChange(() => {
+						// console.log("color has been changed");
+						material.color.set(parameters.color);
+					});
+
+				gui
+					.add(parameters, "spin");
+				
+
+
+
 
 			}
 		}
@@ -232,9 +271,9 @@
 <style lang="scss" scoped>
 
 	canvas {
-		position: fixed;
-		top: 0;
-		left: 0;
+		// position: fixed;
+		// top: 0;
+		// left: 0;
 		outline: none;
 
 

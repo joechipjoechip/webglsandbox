@@ -9,6 +9,8 @@
 			<router-link to="/threejs-journey-3">threejs journey #3 : les anims</router-link>
 			<router-link to="/threejs-journey-4">threejs journey #4 : les caméras</router-link>
 			<router-link to="/threejs-journey-5">threejs journey #5 : les géométries</router-link>
+			<router-link to="/threejs-journey-6">threejs journey #6 : la debug ui</router-link>
+			<router-link to="/threejs-journey-7">threejs journey #7 : les textures</router-link>
 		</nav>
 	</div>
 </template>
