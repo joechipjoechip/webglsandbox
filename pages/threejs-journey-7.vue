@@ -284,6 +284,7 @@
 
 				
 				// explications sur le "mip mapping" (...)
+				// de ce que j'en comprends, mais une lecture approfondie de documentation aiderait :
 				// minFilter = minify (si texture trop petite, les pixels seront floutés)
 				// colorTexture.minFilter = THREE.NearestFilter;
 				// magFilter = magnify (si texture trop petite, les pixels seront laissés tels quels)
@@ -292,6 +293,27 @@
 				// donc :
 				colorTexture.magFilter = THREE.NearestFilter;
 				// aura pour effet d'annuler le blur des trucs étirés
+
+				// NearestFilter améliore les performances
+
+				// le type de filtrage aurait pour but d'éviter les sauts lors d'un passage d'une texture à une autre
+
+				// voilà ce que dit la doc : 
+				// .magFilter : number
+				// How the texture is sampled when a texel covers more than one pixel. The default is THREE.LinearFilter, which takes the four closest texels and bilinearly interpolates among them. The other option is THREE.NearestFilter, which uses the value of the closest texel.
+				// See the texture constants page for details.
+
+				// .minFilter : number
+				// How the texture is sampled when a texel covers less than one pixel. The default is THREE.LinearMipmapLinearFilter, which uses mipmapping and a trilinear filter.
+
+				// et aussi ça
+				// https://zestedesavoir.com/tutoriels/640/les-cartes-graphiques/516_les-composants-dune-carte-graphique/2537_unites-de-texture/#:~:text=Les%20textures%20sont%20des%20images,papier%20peint%20en%20quelque%20sorte.&text=Pour%20bien%20faire%20la%20diff%C3%A9rence,sont%20couramment%20appel%C3%A9s%20des%20texels.
+
+
+				// enfin, quand le NearestFilter est utilisé sur le minFilter, le mipmapping devient inutile
+				// et peut être désactivé grâce à :
+				// colorTexture.generateMipmaps = false;
+
 
 
 
