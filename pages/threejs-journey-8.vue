@@ -155,6 +155,7 @@
 				const doorHeight = textureLoader.load(path + "/door/height.jpg");
 				const doorRoughness = textureLoader.load(path + "/door/roughness.jpg");
 				const doorMetalness = textureLoader.load(path + "/door/metalness.jpg");
+				const doorAmbientOcclusion = textureLoader.load(path + "/door/ambientOcclusion.jpg");
 
 				const gradient = textureLoader.load(path + "/gradients/3.jpg");
 
@@ -220,7 +221,54 @@
 				// gradient.generateMipmaps = false;
 				// material.gradientMap = gradient;
 
-				// 47min : Mesh Standard Material
+				// Mesh Standard Material
+				// le plus opti à priori,
+				// le plus réaliste avec les lights
+				const material = new THREE.MeshStandardMaterial();
+				// // material.metalness = 0.45;
+				// // material.roughness = 0.65;
+				// material.map = doorColor;
+
+				// material.aoMap = doorAmbientOcclusion;
+				// material.aoMapIntensity = 1.35;
+				// material.displacementMap = doorHeight;
+				// material.displacementScale = 0.1;
+
+				// material.metalnessMap = doorMetalness;
+				// material.roughnessMap = doorRoughness;
+
+				// material.normalMap = doorNormal;
+				// // material.normalScale.set(0.5, 0.5);
+
+				// material.alphaMap = doorAlpha;
+				// material.transparent = true;
+
+
+				// maintenant : avec un environnement map :
+				// const material = new THREE.MeshStandardMaterial();
+				// material.metalness = 0.7;
+				// material.roughness = 0.2;
+
+				const cubeTextureLoader = new THREE.CubeTextureLoader(loadingManager);
+				const environnementMapTexture = cubeTextureLoader.load(
+					[
+						`${path}/environmentMaps/3/px.jpg`,
+						`${path}/environmentMaps/3/nx.jpg`,
+						`${path}/environmentMaps/3/py.jpg`,
+						`${path}/environmentMaps/3/ny.jpg`,
+						`${path}/environmentMaps/3/pz.jpg`,
+						`${path}/environmentMaps/3/nz.jpg`
+					]
+				);
+
+				material.envMap = environnementMapTexture;
+
+				// pour trouver des envMap :
+				// google : HDRIHaven permet de télécharger des .hdri
+				// pour transformer ces .hdri en images séparées pour notre cube :
+				// google : HDRI-to-CubeMap sur github (il y a un générateur en ligne)
+				// choisir le découpage en plusieurs images (dernier choix d'output)
+
 
 
 
@@ -234,21 +282,46 @@
 
 
 				const sphere = new THREE.Mesh(
-					new THREE.SphereGeometry(0.5, 16, 16),
+					new THREE.SphereBufferGeometry(0.5, 64,64),
 					material
 				);
 				sphere.position.x = -1.5;
 
+				console.log("attributes : ", sphere.geometry);
+
+				sphere.geometry.setAttribute(
+					"uv2", 
+					new THREE.BufferAttribute(sphere.geometry.attributes.uv.array, 2)
+				);
+
+
+
+
+
 				const plane = new THREE.Mesh(
-					new THREE.PlaneGeometry(1, 1),
+					new THREE.PlaneBufferGeometry(1, 1, 100, 100),
 					material
 				);
 
+				plane.geometry.setAttribute(
+					"uv2", 
+					new THREE.BufferAttribute(plane.geometry.attributes.uv.array, 2)
+				);
+
+
+
+
+
 				const torus = new THREE.Mesh(
-					new THREE.TorusGeometry(0.3, 0.2, 16, 32),
+					new THREE.TorusBufferGeometry(0.3, 0.2, 32, 64),
 					material
 				);
 				torus.position.x = 1.5;
+
+				torus.geometry.setAttribute(
+					"uv2", 
+					new THREE.BufferAttribute(torus.geometry.attributes.uv.array, 2)
+				);
 
 				scene.add(sphere, plane, torus, ambientLight, pointLight);
 
@@ -330,29 +403,39 @@
 				// ADD DEBUG GUI
 				// params : globalObject, specificKey, min, max, steps
 				// gui.add(mesh.position, "x", -3, 3, 0.01);
-				// strictement identique à
-				// gui.add(mesh.position, "y").min(-3).max(3).step(0.01);
-
-				// donc on peut faire : 
-				// gui
-				// 	.add(mesh.position, "y")
-				// 	.min(-3)
-				// 	.max(3)
-				// 	.step(0.01)
-				// 	.name("élévation");
-
-				// // maintenant voyons pour un boolean
-				// // -> mesh.visible
-				// gui
-				// 	.add(mesh, "visible");
-
-				// // autre essai boolean
-				// gui
-				// 	.add(material, "wireframe");
+				
 
 				gui
 					.add(this.animation, "run")
 					.name("run animation");
+
+				gui
+					.add(material, "metalness")
+					.min(0)
+					.max(1)
+					.step(0.01)
+					.name("metalness");
+
+				gui
+					.add(material, "roughness")
+					.min(0)
+					.max(1)
+					.step(0.01)
+					.name("roughness");
+
+				gui
+					.add(material, "aoMapIntensity")
+					.min(0)
+					.max(10)
+					.step(0.01)
+					.name("aoMapIntensity");
+
+				gui
+					.add(material, "displacementScale")
+					.min(0)
+					.max(10)
+					.step(0.01)
+					.name("displacementScale");
 
 				// maintenant : les couleurs (voir l'obj parameters, plus haut)
 				// gui

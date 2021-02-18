@@ -12,6 +12,8 @@
 			<router-link to="/threejs-journey-6">threejs journey #6 : la debug ui</router-link>
 			<router-link to="/threejs-journey-7">threejs journey #7 : les textures</router-link>
 			<router-link to="/threejs-journey-8">threejs journey #8 : les materials</router-link>
+			<router-link to="/threejs-journey-9">threejs journey #9 : les textes 3d</router-link>
+			<router-link to="/threejs-journey-10">threejs journey #10 : les lights</router-link>
 		</nav>
 	</div>
 </template>
