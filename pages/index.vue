@@ -14,6 +14,7 @@
 			<router-link to="/threejs-journey-8">threejs journey #8 : les materials</router-link>
 			<router-link to="/threejs-journey-9">threejs journey #9 : les textes 3d</router-link>
 			<router-link to="/threejs-journey-10">threejs journey #10 : les lights</router-link>
+			<router-link to="/threejs-journey-11">threejs journey #11 : les shadows</router-link>
 		</nav>
 	</div>
 </template>

@@ -1,6 +1,6 @@
 const OFF = "off";
 const WARNING = "warn";
-const ERROR = "error";
+const WARNING = "WARNING";
 
 const ALWAYS = "always";
 const NEVER = "never";
@@ -22,32 +22,32 @@ module.exports = {
 	},
 	extends: [
 		"plugin:vue/recommended",
-		"plugin:vue-scoped-css/recommended"
+		// "plugin:vue-scoped-css/recommended"
 	],
 	rules: {
 		semi: [WARNING, ALWAYS],
-		quotes: [ERROR, "double"],
-		eqeqeq: [ERROR, "always"],
-		"one-var": [ERROR, "never"],
+		quotes: [WARNING, "double"],
+		eqeqeq: [WARNING, "always"],
+		"one-var": [WARNING, "never"],
 		"eol-last": [WARNING, ALWAYS],
 		"no-unused-vars": WARNING,
-		"semi-spacing": [ERROR, {
+		"semi-spacing": [WARNING, {
 			before: false,
 			after: true
 		}],
-		"space-before-function-paren": [ERROR, {
+		"space-before-function-paren": [WARNING, {
 			anonymous: NEVER,
 			named: NEVER,
 			asyncArrow: ALWAYS
 		}],
-		"space-before-blocks": [ERROR, {
+		"space-before-blocks": [WARNING, {
 			functions: NEVER,
 			keywords: NEVER,
 			classes: ALWAYS
 		}],
-		"object-curly-spacing": [ERROR, ALWAYS],
+		"object-curly-spacing": [WARNING, ALWAYS],
 		"array-bracket-spacing": [OFF, NEVER],
-		"keyword-spacing": [ERROR, {
+		"keyword-spacing": [WARNING, {
 			before: true,
 			after: false,
 			overrides: {
@@ -89,33 +89,33 @@ module.exports = {
 				}
 			}
 		}],
-		"brace-style": [ERROR, "stroustrup"],
-		"use-isnan": ERROR,
+		"brace-style": [WARNING, "stroustrup"],
+		"use-isnan": WARNING,
 		"vue/no-v-html": [OFF],
 		"vue-scoped-css/require-scoped": [OFF],
-		"vue/html-indent": [ERROR, "tab"],
+		"vue/html-indent": [WARNING, "tab"],
 		"vue/singleline-html-element-content-newline": [WARNING, {
 			ignoreWhenNoAttributes: true,
 			ignoreWhenEmpty: true,
 			ignores: INLINE_ELEMENTS
 		}],
-		"vue/multiline-html-element-content-newline": [ERROR, {
+		"vue/multiline-html-element-content-newline": [WARNING, {
 			allowEmptyLines: false
 		}],
 		"vue/attributes-order": [OFF],
-		"vue/html-self-closing": [ERROR, {
+		"vue/html-self-closing": [WARNING, {
 			html: {
 				void: ALWAYS,
 				normal: NEVER,
 				component: ALWAYS
 			}
 		}],
-		"vue/html-closing-bracket-spacing": [ERROR, {
+		"vue/html-closing-bracket-spacing": [WARNING, {
 			startTag: NEVER,
 			endTag: NEVER,
 			selfClosingTag: NEVER
 		}],
-		"vue/script-indent": [ERROR, "tab", {
+		"vue/script-indent": [WARNING, "tab", {
 			baseIndent: 1,
 			switchCase: 1
 		}],

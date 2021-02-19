@@ -214,7 +214,7 @@
 
 				// rectAreaLight.lookAt(new THREE.Vector3);
 				// // new THREE.Vector3 tel quel produira 0,0,0, ce qui correspond au centre de la scene
-				// // donc utiliser new THREE.Vector3 tel quel revient à viser le centre de la scene
+				// // donc utiliser new THREE.Vector3 tel quel revient à viser le centre de la scene quand c'est un .lookAt()
 				// scene.add(rectAreaLight);
 
 				// spotlight : 
@@ -258,7 +258,7 @@
 				// il existe des techniques pour éviter d'avoir trop de lights dans une scene
 				// tout en gardant un rendu sympa
 				// c'est valable dans des cas précis :
-				// comme : une abscence de mouvement des lights et une absence de mouvement des objets (seule la camera est abilité à bouger, par exemple)
+				// comme : une abscence de mouvement des lights et une absence de mouvement des objets (seule la camera est abilitée à bouger, par exemple)
 				// alors : le BAKING prend tout son sens
 				// le Baking : c'est le fait de précalculer les lights sur les textures dans un logiciel de 3d
 				// d'exporter les textures avec les lights appliquées dessus
