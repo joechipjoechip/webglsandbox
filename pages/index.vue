@@ -19,6 +19,8 @@
 			<router-link to="/threejs-journey-12">threejs journey #12 : les particules</router-link>
 			<router-link to="/threejs-journey-13">threejs journey #13 : un galaxy generator</router-link>
 			<router-link to="/threejs-journey-14">threejs journey #14 : le raycasting</router-link>
+			<router-link to="/threejs-journey-15">threejs journey #15 : PHYSICS</router-link>
+			<router-link to="/threejs-journey-16">threejs journey #16 : PHYSICS (factorisée)</router-link>
 		</nav>
 	</div>
 </template>

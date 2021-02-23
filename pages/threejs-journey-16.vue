@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<canvas class="webgl" ref="canvas"></canvas>
-		<p>hey three journey 15, la physic</p>
+		<p>hey three journey 16, la physic (factorisée</p>
 	</div>
 </template>
 
@@ -16,8 +16,6 @@
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 	import CANNON from "cannon";
-
-	console.log(CANNON);
 
 	export default {
 		mounted(){
@@ -51,14 +49,6 @@
 						y: e.clientY / sizes.height - 0.5,
 					};
 				});
-
-				// Cursor data pour le RAYCASTER (mouse):
-				// this.$refs.canvas.addEventListener("mousemove", (e) => {
-
-				// 	mouse.x = e.clientX / sizes.width * 2 - 1;
-				// 	mouse.y = - (e.clientY / sizes.height) * 2 + 1;
-
-				// });
 
 				window.addEventListener("resize", (e) => {
 					// update values
@@ -124,13 +114,49 @@
 					width: 400
 				});
 
-				// lib physics 3d :
-				// ammo.js / cannon.js / oimo.js
-				// ammo.js est al plus utilisée, mais pour notre tuto nous utiliserons cannon.js
-				// car plus simple pour un débutant
+				const parameters = {
+					createBalls: () => {
 
-				// lib physics 2d : 
-				// matter.js / P2.js / planck.js / box2D.js
+						const ballAmount = 10;
+
+						for(let i = 0; i < ballAmount; i++){
+
+							objectsToUpdate.push(createSphere("sphere", getRandom(0.05, 0.8), 
+								{
+									x: getRandom(-3, 3),
+									y: getRandom(5, 15),
+									z: getRandom(-3, 3)
+								})
+							);
+
+						}
+						
+					},
+					createBoxes: () => {
+
+						const ballAmount = 10;
+
+						for(let i = 0; i < ballAmount; i++){
+
+							objectsToUpdate.push(createSphere("box", getRandom(0.05, 0.8), 
+								{
+									x: getRandom(-3, 3),
+									y: getRandom(5, 15),
+									z: getRandom(-3, 3)
+								})
+							);
+
+						}
+						
+					}
+				}
+
+				gui.add(parameters, "createBalls").name("create balls");
+				gui.add(parameters, "createBoxes").name("create boxes");
+
+				const getRandom = (min, max) => {
+					return Math.random() * (max - min) + min;
+				};
 
 				// SETUP
 				const scene = new THREE.Scene();
@@ -144,15 +170,10 @@
 					material
 				);
 
-				const sphere = new THREE.Mesh(
-					new THREE.SphereGeometry(0.5,16,16),
-					material
-				);
 
 				plane.rotation.x = Math.PI * -0.5;
-				sphere.position.y = 0.5;
 
-				scene.add(plane, sphere);
+				scene.add(plane);
 
 				// SETUP CANNON
 				const world = new CANNON.World();
@@ -204,19 +225,19 @@
 				// Sphere
 				// Body() is a body played with physic
 				// un body a besoin d'une shape
-				const sphereShape = new CANNON.Sphere(0.5);
+				// const sphereShape = new CANNON.Sphere(0.5);
 
-				const sphereBody = new CANNON.Body({
-					mass: 1,
-					position: new CANNON.Vec3(0, 3, 0),
-					shape: sphereShape,
+				// const sphereBody = new CANNON.Body({
+				// 	mass: 1,
+				// 	position: new CANNON.Vec3(0, 3, 0),
+				// 	shape: sphereShape,
 
-					// une fois que le contact material a été créé, on l'ajoute ici :
-					// material: plasticMaterial // <-- material way 1
-					// material: defaultMaterial // <-- material way 2
-				});
+				// 	// une fois que le contact material a été créé, on l'ajoute ici :
+				// 	// material: plasticMaterial // <-- material way 1
+				// 	// material: defaultMaterial // <-- material way 2
+				// });
 
-				world.addBody(sphereBody);
+				// world.addBody(sphereBody);
 
 				// Floor
 				const floorShape = new CANNON.Plane();
@@ -256,17 +277,81 @@
 				// applyLocalForce() = applyForce mais le 0,0,0 correspond au centre de l'objet (pas de la scène)
 				// applyLocalImpulse() = applyImpulse mais le 0,0,0 correspond au centre de l'objet (pas de la scène)
 
-				// args : source / hitbox
-				// l'intensité découlera de l'éloignement de la source : + c'est éloigné -> + la l'intensité est grande
-				sphereBody.applyLocalForce(
-					new CANNON.Vec3(150, 0, 0),
-					new CANNON.Vec3(0,0,0)
-				);
+				
 
 
 
 
 				
+
+				const sphereGeometry = new THREE.SphereGeometry(1, 16, 16);
+				const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+				
+
+				const createSphere = (type, radius, position) => {
+
+					let mesh = null;
+					let shape = null;
+
+					// THREE
+					switch( type ){
+
+						case "sphere":
+							mesh = new THREE.Mesh(sphereGeometry, material);
+							shape = new CANNON.Sphere(radius);
+							break;
+
+						case "box":
+							mesh = new THREE.Mesh(boxGeometry, material);
+							shape = new CANNON.Box(new CANNON.Vec3(radius / 2, radius / 2, radius / 2));
+							mesh.rotation.x = Math.PI * 0.25;
+							break;
+
+					}
+					
+
+					mesh.scale.set(radius, radius, radius);
+
+					mesh.position.copy(position);
+
+					mesh.castShadow = true;
+					mesh.receiveShadow = true;
+
+					scene.add(mesh);
+
+					// CANNON
+					
+
+					const body = new CANNON.Body({
+						mass: 1,
+						position: new CANNON.Vec3(position.x, position.y, position.z),
+						shape
+					});
+
+					body.position.copy(position);
+
+					world.addBody(body);
+
+					return { mesh, body };
+
+				};
+
+				const objectsToUpdate = [];
+				const count = 20;
+
+				for(let i = 0; i < count; i++){
+
+					// will create meshes, then add them, then create bodies, the add them
+					objectsToUpdate.push(createSphere("box", getRandom(0.5, 1.5), 
+							{
+								x: getRandom(-3, 3),
+								y: getRandom(0, 10),
+								z: getRandom(-3, 3)
+							}
+						)
+					);
+
+				}
 
 
 
@@ -277,7 +362,7 @@
 
 				// Lights
 				const hemisphericLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 1);
-				// scene.add(hemisphericLight);
+				scene.add(hemisphericLight);
 
 				const pointLight = new THREE.PointLight(0xffffff, 1, 10, 1);
 				pointLight.position.y = 3;
@@ -285,7 +370,7 @@
 				scene.add(pointLight);
 
 				// Shadows
-				sphere.castShadow = true;
+				
 				plane.receiveShadow = true;
 				pointLight.castShadow = true;
 
@@ -338,30 +423,18 @@
 
 					// update physics world
 					// update physics world
-
-					// appliquer un vent gentillet venant de la droite
-					sphereBody.applyForce(new CANNON.Vec3(-0.5,0,0), sphereBody.position);
-
-					// world.step( 
-					// 	// refresh rate
-					// 	1/60 ,
-					// 	// how much time was spend since the previous tick
-					// 	deltaTime,
-					// 	// nombre maximum d'appel de .step() par frame (par exécution de tick())
-					// 	3
-					// );
-
-					// inlined :
 					world.step( 1/60, deltaTime, 3);
 
-					// sphere.position.set(
-					// 	sphereBody.position.x,
-					// 	sphereBody.position.y,
-					// 	sphereBody.position.z
-					// );
+					// update positions (meshes & bodies)
+					for(const object of objectsToUpdate){
+						
+						// update positions
+						object.mesh.position.copy(object.body.position);
 
-					// est strictement équivalent à :
-					sphere.position.copy(sphereBody.position);
+						// update angles for bodies
+						object.mesh.quaternion.copy(object.body.quaternion);
+
+					}
 
 
 
