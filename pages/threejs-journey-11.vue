@@ -14,7 +14,7 @@
 	import * as dat from 'dat.gui';
 
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { SphereGeometry, SpotLight } from 'three';
+	import { SphereGeometry, SpotLight } from 'three';
 
 	export default {
 		mounted(){

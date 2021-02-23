@@ -13,8 +13,12 @@
 			<router-link to="/threejs-journey-7">threejs journey #7 : les textures</router-link>
 			<router-link to="/threejs-journey-8">threejs journey #8 : les materials</router-link>
 			<router-link to="/threejs-journey-9">threejs journey #9 : les textes 3d</router-link>
+			<router-link to="/text3dtest">#9.1 : les tests textes 3d</router-link>
 			<router-link to="/threejs-journey-10">threejs journey #10 : les lights</router-link>
 			<router-link to="/threejs-journey-11">threejs journey #11 : les shadows</router-link>
+			<router-link to="/threejs-journey-12">threejs journey #12 : les particules</router-link>
+			<router-link to="/threejs-journey-13">threejs journey #13 : un galaxy generator</router-link>
+			<router-link to="/threejs-journey-14">threejs journey #14 : le raycasting</router-link>
 		</nav>
 	</div>
 </template>
