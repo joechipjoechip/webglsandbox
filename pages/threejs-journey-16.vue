@@ -173,7 +173,7 @@
 
 				plane.rotation.x = Math.PI * -0.5;
 
-				scene.add(plane);
+				// scene.add(plane);
 
 				// SETUP CANNON
 				const world = new CANNON.World();
@@ -260,7 +260,7 @@
 
 				// il est tout à fait possible d'ajouter plusieurs shapes à un seul body, pour faire des models complexes
 				// mais ici on en a qu'un
-				floorBody.addShape(floorShape);
+				// floorBody.addShape(floorShape);
 
 				world.addBody(floorBody);
 
@@ -419,6 +419,9 @@
 
 					// sans ce .update() , le damping ne fonctionnera pas ! 
 					controls.update();
+
+
+					world.gravity.set(0, Math.cos(elapsedTime), 0);
 
 
 					// update physics world

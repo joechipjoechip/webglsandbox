@@ -45,7 +45,7 @@ export default {
       
         config.module.rules.push(
           {
-              test: /\.(fs|vs|glsl)$/,
+              test: /\.(fs|vs|glsl|vert|frag)$/,
               loader: "shader-loader",
               options: {
                   glsl: {
