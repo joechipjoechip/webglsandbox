@@ -1,9 +1,5 @@
 precision mediump float;
 
-
-// ici je recoit le varying que j'ai créé dans le vertex shader
-varying float vRandom;
-
 void main()
 {
 

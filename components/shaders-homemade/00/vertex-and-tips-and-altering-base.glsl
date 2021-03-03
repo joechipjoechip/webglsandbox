@@ -24,6 +24,9 @@ attribute vec3 position;
 // ET MAINTENANT LE CUSTOM :
 attribute float aRandom;
 
+
+// ici, on déclare une nouvelle variable
+// QUI SERA TRANSMISE AU FRAGMENT SHADER
 varying float vRandom;
 
 void main()
@@ -43,6 +46,7 @@ void main()
 
 	vec4 modelPosition = modelMatrix * vec4(position, 1.0);
 	modelPosition.z += aRandom * 0.5;
+	modelPosition.y += aRandom * 0.6;
 
 
 	vec4 viewPosition = viewMatrix * modelPosition;

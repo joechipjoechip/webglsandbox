@@ -24,6 +24,7 @@
 			<router-link to="/threejs-journey-17">threejs journey #17 : Test 2 renderer (with PHYSICS)</router-link>
 			<router-link to="/threejs-journey-18">threejs journey #18 : Material video && sand shaders</router-link>
 			<router-link to="/threejs-journey-19">threejs journey #19 : SHADERS</router-link>
+			<router-link to="/threejs-journey-20">threejs journey #20 : SHADERS with uniforms</router-link>
 		</nav>
 	</div>
 </template>

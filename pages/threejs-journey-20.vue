@@ -114,7 +114,10 @@
 				// SETUP
 				this.scene = new THREE.Scene();
 
-				
+				// Texture
+				const textureLoader = new THREE.TextureLoader();
+				const flagTexture = textureLoader.load("images/textures/flag/frenchFlag.jpg");
+
 
 				// const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
@@ -124,7 +127,23 @@
 					// side: THREE.DoubleSide,
 					// wireframe: true,
 					// transparent: true,
-					// flatShading: true
+					// flatShading: true,
+					uniforms: {
+						uFrequency: {
+							// dans les anciennes versions de three, il fallait préciser le type : 
+							// type: "float",
+							// type: "f",
+							// type: "vec2",
+							// type: "v2",
+							// ce n'est plus nécéssaire maintenant, mais on peut croiser ce legacy
+							value: new THREE.Vector2(10, 5) 
+						},
+						uTime: { value: 0 },
+						// uColor : on aurait pu passer un Vec3 (puisqu'il aurait pu stocker r/g/b)
+						// mais on va utiliser THREE.Color()
+						uColor: { value: new THREE.Color("orange") },
+						uTexture: { value: flagTexture }
+					}
 				});
 
 				const geometry = new THREE.PlaneBufferGeometry(1,1,16,16);
@@ -231,6 +250,9 @@
 					// Do things
 					// ...
 
+					// update material dynamic uniform : uTime
+					material.uniforms.uTime.value = elapsedTime;
+
 
 					// NOW COMPUTE RENDER
 					renderer.render(this.scene, camera);
@@ -243,6 +265,8 @@
 
 				tick();
 				
+				gui.add(material.uniforms.uFrequency.value, "x").min(0).max(20).step(0.01).name("freq x");
+				gui.add(material.uniforms.uFrequency.value, "y").min(0).max(20).step(0.01).name("freq y");
 
 				gui
 					.add(this.animation, "run")
