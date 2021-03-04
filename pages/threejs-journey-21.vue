@@ -8,7 +8,7 @@
 
 	import * as THREE from 'three';
 
-	// import gsap from 'gsap';
+	import gsap from 'gsap';
 
 	import * as dat from 'dat.gui';
 
@@ -37,31 +37,41 @@
 					height: window.innerHeight
 				};
 
-				let cursor = { x: 0, y: 0 };
-				let mouse = new THREE.Vector2();
-				// let mouse = { x: 0, y: 0 }; <-  aurait pu fonctionner
-
-				// Cursor data :
-				// this.$refs.canvas.addEventListener("mousemove", (e) => {
-				// 	cursor = {
-				// 		x: e.clientX / sizes.width - 0.5,
-				// 		y: e.clientY / sizes.height - 0.5,
-				// 	};
-				// });
-
-				// events 
-
-				const SCREENLEVEL = -0.2;
-				const UNSANDLARGER = 4;
+				// SAND VARIABLES - - - - -
+				const nbSubdivisions = 70;
+				const SCREENLEVEL = -0.1;
 				const ABCARRAY = new Array("a", "b", "c");
-				
+				const UNSANDLARGER = nbSubdivisions / 2;
+				const UNSANDIMPACT = 0.002;
 
+				// trace
+				const largeurTrace = UNSANDLARGER / 12;
+				const maxHeight = 0.1;
+				const animTrace = true;
+				const traceDuration = 0.2;
+
+				let upperFacesPos = [];
+				let upperFacesNeg = [];
+				// - - - - - - - - - - - - -
+
+				// Particules - - - - - - -
+				const particulesCount = 2000;
+				// - - - - - - - - - - - - -
+
+				let mouse = new THREE.Vector2();
+				let cursor = new THREE.Vector2();
+				
 				const onDocumentMouseMove = ( event ) => {
 
-					
 					event.preventDefault();
 					mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
 					mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+
+					cursor.x = event.clientX;
+					cursor.y = event.clientY;
+
+					// console.log("mouse : ", mouse);
+					// console.log("cursor : ", cursor);
 
 				}
 
@@ -147,7 +157,7 @@
 				// SETUP
 				this.scene = new THREE.Scene();
 
-				// Textures
+				// SANDPLANE
 				const textureLoader = new THREE.TextureLoader();
 				const sandVersion = "7";
 
@@ -164,12 +174,11 @@
 					specularMap: sandTextureSpec,
 					displacementMap: sandTextureDisp,
 					displacementScale: -0.1,
-					morphTargets: true,
+					// morphTargets: true,
+					// wireframe: true
 				});
 
-				
-
-				const sandGeometry = new THREE.PlaneGeometry(10,10,64,64);
+				const sandGeometry = new THREE.PlaneGeometry(10, 10, nbSubdivisions, nbSubdivisions);
 
 				const sandPlane = new THREE.Mesh(
 					sandGeometry,
@@ -178,7 +187,7 @@
 
 
 
-
+				// SCREEN
 				const screenGeometry = new THREE.PlaneGeometry(3,3,1);
 
 				const video = document.createElement("video");
@@ -202,31 +211,75 @@
 				screen.position.y = SCREENLEVEL;
 				screen.rotation.x = Math.PI * -0.5;
 
+				// Particules
+				const particulesPositions = new Float32Array(particulesCount * 3);
+				const particulesColors = new Float32Array(particulesCount * 3);
+				const particulesGeometry = new THREE.BufferGeometry(1, 16,16);
+				let randomGrey = Math.abs(Math.random() + 0.5);
+				const particulesContainerSize = 0.2;
+
+				for(let i = 0; i < particulesCount; i++){
+
+					if( i % 3 === 0 ){
+						randomGrey = Math.abs(Math.random() + 0.5);
+					}
+
+					particulesPositions[i] = ((Math.random() - 0.5) * 2) * particulesContainerSize;
+
+					particulesColors[i] = randomGrey;
+
+				};
+
+				particulesGeometry.setAttribute(
+					'position',
+					new THREE.BufferAttribute(particulesPositions, 3)
+				);
+
+				particulesGeometry.setAttribute(
+					'color',
+					new THREE.BufferAttribute(particulesColors, 3)
+				);
+				// particulesGeometry.color = new THREE.Color("#cec4b4");
+
+				const particuleTexture = textureLoader.load("/images/particules/3.png");
+
+				const particulesMaterial = new THREE.PointsMaterial({
+					size: 0.04,
+					sizeAttenuation: true,
+					alphaMap: particuleTexture,
+					transparent: true,
+					depthWrite: false,
+					// blending: THREE.AdditiveBlending,
+					// rien à voir, mais on va donner les randomized colors au matérial :
+					vertexColors: true,
+					color: 0xcec4b4
+				});
+
+				const particules = new THREE.Points(particulesGeometry, particulesMaterial);
+
+				const particulesConfig = {
+					size: 0.02,
+					ratio: 10
+				};
+				
+				this.scene.add(particules);
+
+
 
 				// Lights
-				// const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-				// this.scene.add(ambientLight);
+				const pointLight1 = new THREE.PointLight(0xffffff, 1, 10, 1);
+				pointLight1.position.y = 3;
+				pointLight1.position.x = 2;
+				this.scene.add(pointLight1);
 
+				const pointLight2 = new THREE.PointLight(0xffffff, 1, 10, 1);
+				pointLight2.position.y = 3;
+				pointLight2.position.x = -2;
+				this.scene.add(pointLight2);
 
-				const pointLight = new THREE.PointLight(0xffffff, 1, 10, 1);
-				pointLight.position.y = 3;
-				pointLight.position.x = 3;
-				this.scene.add(pointLight);
-
-				// Shadows
-				// plane.receiveShadow = true;
-				// pointLight.castShadow = true;
-
-				// pointLight.shadow.mapSize.width = 1024;
-				// pointLight.shadow.mapSize.height = 1024;
 
 				// RAYCASTER
 				const raycaster = new THREE.Raycaster();
-
-				// Raycaster depuis la mouse :
-				// recréons de toutes pièces les event mouseenter et mouseleave
-				// avec une variable "témoin"
-				let currentIntersect = null;
 
 
 				// Camera
@@ -271,37 +324,61 @@
 					// sans ce .update() , le damping ne fonctionnera pas ! 
 					controls.update();
 
-					// RAYCASTER INTERSECTS (terraforming)
 					if (mouse && mouse.x) {
-
+						
+						// RAYCASTER INTERSECTS (terraforming) - - - - - - - - -
 						raycaster.setFromCamera( mouse, camera );
 
-						var intersects = raycaster.intersectObjects( [sandPlane] );
+						const intersects = raycaster.intersectObjects( [sandPlane, screen] );
 
-						if ( intersects.length > 0 && intersects[0] && intersects[0].face ) {
+						const isHoveringScreen = intersects.filter(intersection => intersection.object.uuid === screen.uuid).length > 0;
 
+						if ( intersects.length > 0 && intersects[0].face ) {
 
-							const largerFaces = {
-								a: [intersects[0].face.a - UNSANDLARGER, intersects[0].face.a + UNSANDLARGER],
-								b: [intersects[0].face.b - UNSANDLARGER, intersects[0].face.b + UNSANDLARGER],
-								c: [intersects[0].face.c - UNSANDLARGER, intersects[0].face.c + UNSANDLARGER]
-							};
+							const center = intersects[0].face.b;
 
-							for(const faceKey of ABCARRAY){
+							const currentVertice = sandGeometry.vertices[center];
 
-								for(let i = largerFaces[faceKey][0]; i < largerFaces[faceKey][1]; i++){
+							const endFace = center + UNSANDLARGER;
 
-									if( sandGeometry.vertices[intersects[0].face[faceKey]].z >= SCREENLEVEL * 1.1 ){
+							// creuse
+							for(let i = center; i < endFace; i++){
 
-										sandGeometry.vertices[intersects[0].face[faceKey]].z -= 0.005;
+								for(const pointKey of ABCARRAY){
+
+									const target = sandGeometry.vertices[intersects[0].face[pointKey]];
+
+									if( target.z >= SCREENLEVEL * 1.1 ){
+
+										target.z -= UNSANDIMPACT;
 
 									}
 
-
 								}
+
+							}
+
+							// fait une trace autour du creux
+							if( !isHoveringScreen ){
+								createTrace(center, currentVertice);
+							}
+							// - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+
+							// Particules
+							for(let i = 0; i < particulesCount; i++){
+								
+								particulesPositions[i] = (((Math.random() - 0.5) * 2) * particulesContainerSize) + cursor.x;
 
 							};
 
+							particulesGeometry.setAttribute(
+								'position',
+								new THREE.BufferAttribute(particulesPositions, 3)
+							);
+							// - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+							
 
 						}
 
@@ -312,6 +389,8 @@
 					sandGeometry.verticesNeedUpdate = true;
 					sandGeometry.computeFaceNormals();
 					sandGeometry.computeVertexNormals();
+
+					
 					
 
 
@@ -329,6 +408,80 @@
 				};
 
 				tick();
+
+				const createTrace = ( center, currentVertice ) => {
+					// laisse une trace (rebords plus hauts)
+					
+					const upperFacesArrays = [upperFacesPos, upperFacesNeg];
+					upperFacesPos = [];
+					upperFacesNeg = [];
+
+					const currentVerticeAbsZ = Math.abs(currentVertice.z);
+					const sandGeometryVertices = sandGeometry.vertices;
+					
+
+					for(let i = 1; i < largeurTrace; i++){
+
+						sandGeometryVertices[center + i] && upperFacesPos.push(sandGeometryVertices[center + i]);
+
+						sandGeometryVertices[center - i] && upperFacesNeg.push(sandGeometryVertices[center - i]);
+
+					}
+
+					for( const upperFaceArray of upperFacesArrays ){
+
+						upperFaceArray.forEach((upperFace, index) => {
+	
+							if( index < 1 ){
+								// les premiers font monter moins que les suivants pour arrondir
+								// le passage entre creux et trace
+	
+								if( animTrace ){
+
+									gsap.to(upperFace, {
+										duration: traceDuration,
+										z: upperFace.z - UNSANDIMPACT / (2 - index)
+									});
+
+								} else {
+
+									upperFace.z -= UNSANDIMPACT / (2 - index);
+
+								}
+
+							}
+							else if( upperFace.z < maxHeight && upperFace.z > SCREENLEVEL / 2){
+								// les suivants, pour créer la trace, vont monter de manière dégressive selon leur éloignement
+	
+								const elevationRatio = (largeurTrace / (index + 1)) * 0.1;
+	
+
+								if( animTrace ){
+									
+									gsap.to(upperFace, {
+										duration: traceDuration,
+										z: (currentVerticeAbsZ / 2) + ((UNSANDIMPACT / 2) * elevationRatio)
+									});
+
+								} else {
+
+									upperFace.z = (currentVerticeAbsZ / 2) + ((UNSANDIMPACT / 2) * elevationRatio);
+
+								}
+
+							}
+							
+						});
+
+					}
+
+					// gsap.to(mesh.rotation, {
+					// 	duration: 2,
+					// 	y: mesh.rotation.y + 10
+					// });
+					
+
+				};
 				
 
 				gui

@@ -25,6 +25,7 @@
 			<router-link to="/threejs-journey-18">threejs journey #18 : Material video && sand shaders</router-link>
 			<router-link to="/threejs-journey-19">threejs journey #19 : SHADERS</router-link>
 			<router-link to="/threejs-journey-20">threejs journey #20 : SHADERS with uniforms</router-link>
+			<router-link to="/threejs-journey-21">threejs journey #21 : Video + sand + particles</router-link>
 		</nav>
 	</div>
 </template>

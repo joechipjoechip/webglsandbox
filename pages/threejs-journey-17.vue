@@ -20,7 +20,7 @@
 
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-	import CANNON from "cannon";
+	import * as CANNON from "cannon-es";
 
 	export default {
 		mounted(){

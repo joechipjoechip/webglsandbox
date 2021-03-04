@@ -15,7 +15,7 @@
 
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-	import CANNON from "cannon";
+	import * as CANNON from "cannon-es";
 
 	export default {
 		mounted(){
@@ -148,14 +148,50 @@
 
 						}
 						
+					},
+					reset: () => {
+
+						for(const object of objectsToUpdate){
+
+							// remove body
+							object.body.removeEventListener("collide", playHitSound);
+							world.removeBody(object.body);
+
+							// remove mesh
+							scene.remove(object.mesh);
+
+						}
+
 					}
 				}
 
 				gui.add(parameters, "createBalls").name("create balls");
 				gui.add(parameters, "createBoxes").name("create boxes");
+				gui.add(parameters, "reset").name("reset");
 
 				const getRandom = (min, max) => {
 					return Math.random() * (max - min) + min;
+				};
+
+				// SOUND
+				const hitSound = new Audio("/sounds/hit.mp3");
+
+				const playHitSound = (collision) => {
+
+					// récupérer la puissance de la collision :
+					const impactStrength = collision.contact.getImpactVelocityAlongNormal();
+
+					if( impactStrength > 1.5 ){
+
+						// bien sur dans l'ideal, on regle le volume en fonction du impactStrength,
+						// mais bref
+
+						hitSound.currentTime = 0;
+						hitSound.play();
+
+					}
+					
+
 				};
 
 				// SETUP
@@ -176,7 +212,26 @@
 				// scene.add(plane);
 
 				// SETUP CANNON
+				// CANNON n'a pas été update depuis des années,
+				// mais des gens l'ont forké et l'ont amélioré :
+				// npm install --save cannon-es@0.15.1
+
+				// En terme d'opti :
+				// ne pas oublier que la physic est généralement traité dans un thread différent du CPU
+				// grâce aux workers
 				const world = new CANNON.World();
+
+				// manière opti de calculer les collisions
+				world.broadphase = new CANNON.SAPBroadphase(world);
+
+				// autre opti : permet de dire qu'un body qui ne bouge plus ne doit pas être testé
+				// et don't worry, si un autre body vient le toucher, alors il se reveillera et sera testé à nouveau
+				world.allowSleep = true;
+
+				// on peut aussi régler, si on veut :
+				// sleepSpeedLimit et sleepTimeLimit
+				// pour affiner les statuts de sleeping et wakeup
+				// mais ici on va faire confiance aux valeurs par default, qui sont plus très bien calibrées
 
 				world.gravity.set(0, -9.82, 0);
 				// -9.82 est la gravité terrestre
@@ -329,6 +384,18 @@
 					});
 
 					body.position.copy(position);
+
+					body.addEventListener("collide", playHitSound);
+
+
+					// Enfin, il est possible de créer des contraintes physiques avec : 
+					// HingeConstraint (exemple : une porte)
+					// DistanceConstraint (exemple : des aimants qui se répulsent)
+					// LockConstraint (exemple : deux bodys attachés)
+					// PointToPointConstraint (exemple: deux bodys attachés par un point précis)
+
+					// --> pour ça et d'autres points de la doc : 
+					// https://schteppe.github.io/cannon.js/
 
 					world.addBody(body);
 

@@ -15,7 +15,7 @@
 
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-	import CANNON from "cannon";
+	import * as CANNON from "cannon-es";
 
 	console.log(CANNON);
 
@@ -156,6 +156,7 @@
 
 				// SETUP CANNON
 				const world = new CANNON.World();
+				world.broadphase = new CANNON.SAPBroadphase(world);
 
 				world.gravity.set(0, -9.82, 0);
 				// -9.82 est la gravité terrestre

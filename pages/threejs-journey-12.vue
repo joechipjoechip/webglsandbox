@@ -14,7 +14,7 @@
 	import * as dat from 'dat.gui';
 
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { Blending, SphereGeometry, SpotLight, VertexColors } from 'three';
+	import { Blending, SphereGeometry, SpotLight, VertexColors } from 'three';
 
 	export default {
 		mounted(){
@@ -160,7 +160,7 @@ import { Blending, SphereGeometry, SpotLight, VertexColors } from 'three';
 				// Geometry
 				const particulesGeometry = new THREE.BufferGeometry(1, 32, 32);
 
-				// on va créer 500 particules
+				// on va créer x particules
 				const count = 20000;
 
 				// ici on va créer à la main les positions des vertex de notre custom geometry
