@@ -13,8 +13,6 @@
 
 	import * as dat from 'dat.gui';
 
-	console.log("hey dat : ", dat);
-
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 	export default {

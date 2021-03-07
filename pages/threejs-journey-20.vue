@@ -143,6 +143,8 @@
 						// mais on va utiliser THREE.Color()
 						uColor: { value: new THREE.Color("orange") },
 						uTexture: { value: flagTexture }
+						// ici on peut passer le canvasTexture
+						// canvasTexture: { value: canvasTexture }
 					}
 				});
 

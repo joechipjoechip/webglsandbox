@@ -19,11 +19,18 @@ varying vec2 vUv;
 
 varying float vElevation;
 
+// jordan tips : 
+uniform sampler2D canvasTexture;
+
+
 
 
 void main()
 {
 	vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+
+	float amountLight = texture2D(canvasTexture, uv).r;
+	// donc j'aurais un truc entre 0 et 1
 
 	float elevation = sin(modelPosition.x * uFrequency.x - uTime) * 0.1;
 	elevation += sin(modelPosition.y * uFrequency.y - (uTime / 2.0)) * 0.1;

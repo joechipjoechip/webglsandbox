@@ -9,15 +9,11 @@
 
 	import * as THREE from 'three';
 
-	// import gsap from 'gsap';
-
 	import * as dat from 'dat.gui';
 
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 	import * as CANNON from "cannon-es";
-
-	console.log(CANNON);
 
 	export default {
 		mounted(){
