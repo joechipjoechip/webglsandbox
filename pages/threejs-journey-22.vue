@@ -1,6 +1,7 @@
 <template>
 	<div>
-		<canvas ref="canvas"></canvas>
+		<canvas class="webgl" ref="canvas"></canvas>
+		<div class="digCanvasContainer" ref="digCanvas"></div>
 	</div>
 </template>
 
@@ -14,7 +15,9 @@
 
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-	import * as CANNON from "cannon-es";
+	import vertexShader from "./../components/shaders-homemade/sand/vertex.glsl";
+
+	import fragmentShader from "./../components/shaders-homemade/sand/fragment.glsl";
 
 	export default {
 		mounted(){
@@ -38,38 +41,11 @@
 				};
 
 				// SAND VARIABLES - - - - -
-				const nbSubdivisions = 70;
-				const SCREENLEVEL = -0.05;
-				const ABCARRAY = new Array("a", "b", "c");
-				const UNSANDLARGER = nbSubdivisions / 2;
-				const UNSANDIMPACT = 0.002;
-
-				// trace
-				const largeurTrace = UNSANDLARGER / 12;
-				const maxHeight = 0.1;
-				const animTrace = true;
-				const traceDuration = 0.2;
-
-				let upperFacesPos = [];
-				let upperFacesNeg = [];
-				// - - - - - - - - - - - - -
-
-				// Particules - - - - - - -
-				const particulesCount = 200;
-				const particulesCoef = 0.3;
-				const particulesContainerSize = {
-					x: 0.5 * particulesCoef,
-					sinX: Math.abs(Math.sin(0.5 * particulesCoef)),
-					y: 0.1 * particulesCoef,
-					sinY: Math.abs(Math.sin(0.1 * particulesCoef)),
-					z: 0.5 * particulesCoef,
-					sinZ: Math.abs(Math.sin(0.5 * particulesCoef))
-				};
-				// - - - - - - - - - - - - -
+				const nbSubdivisions = 120;
+				const DIGCIRCLESIZE = 7;
+				const DIGCIRCLESIZEUP = 9;
 
 				let mouse = new THREE.Vector2();
-				let mouseIsMoving = false;
-				let cursor = new THREE.Vector2();
 				
 				const onDocumentMouseMove = ( event ) => {
 
@@ -77,17 +53,11 @@
 					mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
 					mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
 
-					cursor.x = event.clientX;
-					cursor.y = event.clientY;
-
-					mouseIsMoving = true;
-
-				}
+				};
 
 				const onDocumentMouseLeave = ( event ) => {
 					mouse = {};
-					mouseIsMoving = false;
-				}
+				};
 
 				this.$refs.canvas.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				this.$refs.canvas.addEventListener( 'mouseout', onDocumentMouseLeave, false );
@@ -164,6 +134,34 @@
 					return Math.random() * (max - min) + min;
 				};
 
+
+
+				// Canvas invisible qui va récup les position de la souris
+				this.digCanvas = document.createElement("canvas");
+				this.digCtx = this.digCanvas.getContext('2d');
+				this.digCanvas.width = 200;
+				this.digCanvas.height = 200;
+				// this.digCtx.fillStyle = "#FFFFFF";
+				// this.digCtx.fillRect(0,0,200,200);
+				
+
+				this.$refs.digCanvas.append(this.digCanvas);
+
+				const canvasTexture = new THREE.CanvasTexture(this.digCanvas);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 				// SETUP
 				this.scene = new THREE.Scene();
 
@@ -177,15 +175,32 @@
 				const sandTextureOcc = textureLoader.load(`images/textures/sand${sandVersion}/Sand_00${sandVersion}_OCC.jpg`);
 				const sandTextureSpec = textureLoader.load(`images/textures/sand1/Sand_001_SPEC.png`);
 
-				const sandMaterial = new THREE.MeshStandardMaterial({
-					map: sandTextureColor,
-					aoMap: sandTextureOcc,
-					normalMap: sandTextureNormal,
-					specularMap: sandTextureSpec,
-					displacementMap: sandTextureDisp,
-					displacementScale: -0.1,
-					// morphTargets: true,
-					// wireframe: true
+				// const sandMaterial = new THREE.MeshStandardMaterial({
+				// 	map: sandTextureColor,
+				// 	aoMap: sandTextureOcc,
+				// 	normalMap: sandTextureNormal,
+				// 	specularMap: sandTextureSpec,
+				// 	displacementMap: sandTextureDisp,
+				// 	displacementScale: -0.1,
+				// 	// morphTargets: true,
+				// 	// wireframe: true
+				// });
+				const sandMaterial = new THREE.RawShaderMaterial({
+					vertexShader,
+					fragmentShader,
+					// side: THREE.DoubleSide,
+					// wireframe: true,
+					// transparent: true,
+					// flatShading: true,
+					uniforms: {
+						uFrequency: {
+							value: new THREE.Vector2(10, 5) 
+						},
+						uTime: { value: 0 },
+						uColor: { value: new THREE.Color("orange") },
+						uTexture: { value: sandTextureColor },
+						uCanvasTexture: { value: canvasTexture }
+					}
 				});
 
 				const sandGeometry = new THREE.PlaneGeometry(10, 10, nbSubdivisions, nbSubdivisions);
@@ -195,86 +210,33 @@
 					sandMaterial
 				);
 
+				this.scene.add(sandPlane);
+
 
 
 				// SCREEN
-				const screenGeometry = new THREE.PlaneGeometry(3,3,1);
+				// const screenGeometry = new THREE.PlaneGeometry(3,3,1);
 
-				const video = document.createElement("video");
-				video.src = "videos/test.mp4";
-				video.load();
-				video.play();
+				// const video = document.createElement("video");
+				// video.src = "videos/test.mp4";
+				// video.load();
+				// video.play();
 
-				const videoTexture = new THREE.VideoTexture(video);
-				const screenMaterial = new THREE.MeshBasicMaterial({ 
-					map: videoTexture, 
-					side: THREE.FrontSide, 
-					toneMapped: false 
-				});
+				// const videoTexture = new THREE.VideoTexture(video);
+				// const screenMaterial = new THREE.MeshBasicMaterial({ 
+				// 	map: videoTexture, 
+				// 	side: THREE.FrontSide, 
+				// 	toneMapped: false 
+				// });
 
-				const screen = new THREE.Mesh(screenGeometry, screenMaterial);
+				// const screen = new THREE.Mesh(screenGeometry, screenMaterial);
 
-				this.scene.add(screen);
-				this.scene.add(sandPlane);
-
-				sandPlane.rotation.x = Math.PI * -0.5;
-				screen.position.y = SCREENLEVEL;
-				screen.rotation.x = Math.PI * -0.5;
-
-				// Particules
-				const particulesPositions = new Float32Array(particulesCount * 3);
-				const particulesColors = new Float32Array(particulesCount * 4);
-				const particulesGeometry = new THREE.BufferGeometry(1, 16,16);
-				let randomGrey = Math.abs(Math.random() + 0.5);
+				// this.scene.add(screen);
 				
 
-				for(let i = 0; i < particulesCount; i++){
-
-					if( i % 3 === 0 ){
-						randomGrey = Math.abs(Math.random() + 0.5);
-					}
-
-					particulesPositions[i] = ((Math.random() - 0.5) * 2) * particulesContainerSize.x;
-
-					particulesColors[i] = randomGrey;
-
-				};
-
-				// particulesGeometry.setAttribute(
-				// 	'position',
-				// 	new THREE.BufferAttribute(particulesPositions, 3)
-				// );
-
-				particulesGeometry.setAttribute(
-					'color',
-					new THREE.BufferAttribute(particulesColors, 3)
-				);
-				// particulesGeometry.color = new THREE.Color("#cec4b4");
-
-				const particuleTexture = textureLoader.load("/images/particules/3.png");
-
-				const particulesMaterial = new THREE.PointsMaterial({
-					size: 0.01,
-					sizeAttenuation: true,
-					alphaMap: particuleTexture,
-					transparent: true,
-					depthWrite: false,
-					// blending: THREE.AdditiveBlending,
-					// rien à voir, mais on va donner les randomized colors au matérial :
-					vertexColors: true,
-					color: 0xcec4b4
-				});
-
-				const particules = new THREE.Points(particulesGeometry, particulesMaterial);
-
-				const particulesConfig = {
-					size: 0.02,
-					ratio: 10
-				};
-				
-				this.scene.add(particules);
-
-
+				// sandPlane.rotation.x = Math.PI * -0.5;
+				// screen.position.y = SCREENLEVEL;
+				// screen.rotation.x = Math.PI * -0.5;
 
 				// Lights
 				const pointLight1 = new THREE.PointLight(0xffffff, 1, 10, 1);
@@ -339,90 +301,21 @@
 						// RAYCASTER INTERSECTS (terraforming) - - - - - - - - -
 						raycaster.setFromCamera( mouse, camera );
 
-						const intersects = raycaster.intersectObjects( [sandPlane, screen] );
+						// const intersects = raycaster.intersectObjects( [sandPlane, screen] );
+						const intersects = raycaster.intersectObjects( [sandPlane] );
 
-						const isHoveringScreen = intersects.filter(intersection => intersection.object.uuid === screen.uuid).length > 0;
+						// const isHoveringScreen = intersects.filter(intersection => intersection.object.uuid === screen.uuid).length > 0;
 
+						const digData = intersects.filter(intersect => intersect.object.uuid === sandPlane.uuid)[0];
 
-						if ( intersects.length > 0 && intersects[0].face ) {
-
-							const center = intersects[0].face.b;
-
-							const currentVertice = sandGeometry.vertices[center];
-
-							const endFace = center + UNSANDLARGER;
-
-							// creuse
-							for(let i = center; i < endFace; i++){
-
-								for(const pointKey of ABCARRAY){
-
-									const target = sandGeometry.vertices[intersects[0].face[pointKey]];
-
-									if( target.z >= SCREENLEVEL ){
-
-										// alors on creuse
-										target.z -= UNSANDIMPACT;
-
-										// et on update les particules
-										for(let i = 0; i < particulesCount; i = i + 4){
-
-											particulesPositions[i] = ((Math.random() - 0.5) * 2) * particulesContainerSize.sinX + intersects[0].point.x;
-
-											particulesPositions[i + 1] = ((Math.random() - 0.5) * 2) * particulesContainerSize.sinY + intersects[0].point.y;
-
-											particulesPositions[i + 2] = ((Math.random() - 0.5) * 2) * particulesContainerSize.sinZ + intersects[0].point.z;
-
-											particulesPositions[i + 3] = Math.random() - 0.4;
-
-										}
-
-									}
-
-								}
-
-							}
-
-							// fait une trace autour du creux
-							if( !isHoveringScreen ){
-								createTrace(center, currentVertice);
-							}
-							// - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-
-							
-
+						// ici on va aller dessiner sur le digCanvas
+						if( digData ){
+							drawOnDigCanvas(digData.uv);
+							canvasTexture.needsUpdate = true;
 						}
-
-						mouse = {};
-
-					} else {
-
-						// for(let i = 0; i < particulesCount; i++){
-	
-						// 	particulesPositions[i] = 0;
-	
-						// }
 
 
 					}
-
-					particulesGeometry.setAttribute(
-						'position',
-						new THREE.BufferAttribute(particulesPositions, 4)
-					);
-
-					sandGeometry.verticesNeedUpdate = true;
-					sandGeometry.computeFaceNormals();
-					sandGeometry.computeVertexNormals();
-
-					
-					
-
-
-
-			
-
 
 					// NOW COMPUTE RENDER
 					renderer.render(this.scene, camera);
@@ -435,80 +328,22 @@
 
 				tick();
 
-				const createTrace = ( center, currentVertice ) => {
-					// laisse une trace (rebords plus hauts)
-					
-					const upperFacesArrays = [upperFacesPos, upperFacesNeg];
-					upperFacesPos = [];
-					upperFacesNeg = [];
+				const drawOnDigCanvas = uv => {
+					const x = uv.x * this.digCanvas.width;
+					const y = (1 - uv.y) * this.digCanvas.height;
 
-					const currentVerticeAbsZ = Math.abs(currentVertice.z);
-					const sandGeometryVertices = sandGeometry.vertices;
-					
-
-					for(let i = 1; i < largeurTrace; i++){
-
-						sandGeometryVertices[center + i] && upperFacesPos.push(sandGeometryVertices[center + i]);
-
-						sandGeometryVertices[center - i] && upperFacesNeg.push(sandGeometryVertices[center - i]);
-
-					}
-
-					for( const upperFaceArray of upperFacesArrays ){
-
-						upperFaceArray.forEach((upperFace, index) => {
-	
-							if( index < 1 ){
-								// les premiers font monter moins que les suivants pour arrondir
-								// le passage entre creux et trace
-	
-								if( animTrace ){
-
-									gsap.to(upperFace, {
-										duration: traceDuration,
-										z: upperFace.z - UNSANDIMPACT / (2 - index)
-									});
-
-								} else {
-
-									upperFace.z -= UNSANDIMPACT / (2 - index);
-
-								}
-
-							}
-							else if( upperFace.z < maxHeight && upperFace.z > SCREENLEVEL / 2){
-								// les suivants, pour créer la trace, vont monter de manière dégressive selon leur éloignement
-	
-								const elevationRatio = (largeurTrace / (index + 1)) * 0.1;
-	
-
-								if( animTrace ){
-									
-									gsap.to(upperFace, {
-										duration: traceDuration,
-										z: (currentVerticeAbsZ / 2) + ((UNSANDIMPACT / 2) * elevationRatio)
-									});
-
-								} else {
-
-									upperFace.z = (currentVerticeAbsZ / 2) + ((UNSANDIMPACT / 2) * elevationRatio);
-
-								}
-
-							}
-							
-						});
-
-					}
-
-					// gsap.to(mesh.rotation, {
-					// 	duration: 2,
-					// 	y: mesh.rotation.y + 10
-					// });
-					
+					this.digCtx.save();
+					this.digCtx.fillStyle = "rgba(255,0,0,0.05)";
+					this.digCtx.strokeStyle = "rgba(0,255,0,0.005)";
+					this.digCtx.beginPath();
+					this.digCtx.ellipse(x, y, DIGCIRCLESIZE, DIGCIRCLESIZE, 0, 0, 2 * Math.PI);
+					this.digCtx.fill();
+					this.digCtx.strokeStyle = "rgba(0,255,0,0.01)";
+					this.digCtx.ellipse(x, y, DIGCIRCLESIZEUP, DIGCIRCLESIZEUP, 0, 0, 2 * Math.PI);
+					this.digCtx.stroke();
+					this.digCtx.restore();
 
 				};
-				
 
 				gui
 					.add(this.animation, "run")
@@ -520,7 +355,7 @@
 	}
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 
 	.dg.ac {
 		z-index: 10;
@@ -535,7 +370,7 @@
 			
 	}
 
-	canvas {
+	.webgl {
 		// position: fixed;
 		// top: 0;
 		// left: 0;
@@ -548,6 +383,13 @@
 
 		pointer-events: all;
 		z-index: 3;
+	}
+
+	.digCanvasContainer {
+		position: fixed;
+		top: 0;
+		left: 0;
+		border: solid 1px red;
 	}
 
 

@@ -520,7 +520,7 @@
 	}
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 
 	.dg.ac {
 		z-index: 10;
