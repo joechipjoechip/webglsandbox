@@ -1,17 +1,6 @@
-uniform mat4 projectionMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 modelMatrix;
-
 uniform vec2 uFrequency;
 uniform float uTime;
-
-attribute vec3 position;
-
-// ET MAINTENANT LE CUSTOM :
-attribute float aRandom;
-
-// ici on accède à la position du vertex actuellement "en construction"
-attribute vec2 uv;
+uniform float uDeepMax;
 
 // et ici on créé une varying pour pouvoir y stocker un vec2,
 // pour pouvoir la transmettre au frag shader
@@ -19,8 +8,8 @@ varying vec2 vUv;
 
 varying float vDigness;
 
-// jordan tips : 
-uniform sampler2D uCanvasTexture;
+uniform sampler2D uCanvasDigTexture;
+uniform sampler2D uCanvasWaveTexture;
 
 
 
@@ -28,14 +17,13 @@ uniform sampler2D uCanvasTexture;
 void main()
 {
 	vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+	float currentRedOnCanvas = texture2D(uCanvasDigTexture, uv).r;
+	float currentAlphaOnCanvas = texture2D(uCanvasDigTexture, uv).a;
+	float currentDignessImpact = currentRedOnCanvas * currentAlphaOnCanvas;
 
-	// float amountRed = texture2D(uCanvasTexture, uv).r;
-	// float amountAlpha = texture2D(uCanvasTexture, uv).a;
-	float amountToDig = texture2D(uCanvasTexture, uv).r * texture2D(uCanvasTexture, uv).a;
-	float amountToUp = texture2D(uCanvasTexture, uv).g * texture2D(uCanvasTexture, uv).a;
+	float amountToDig = min(currentDignessImpact, uDeepMax);
 
-	modelPosition.z -= amountToDig;
-	modelPosition.z += amountToUp;
+	modelPosition.y -= amountToDig;
 
 	vec4 viewPosition = viewMatrix * modelPosition;
 	vec4 projectedPosition = projectionMatrix * viewPosition;
@@ -46,6 +34,6 @@ void main()
 	// ici on update vUv en lui donnant les coordonnées du vertex "en construction"
 	vUv = uv;
 
-	vDigness = amountToDig;
+	vDigness = currentDignessImpact;
 
 }

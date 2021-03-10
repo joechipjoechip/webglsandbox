@@ -2,6 +2,7 @@
 	<div>
 		<canvas class="webgl" ref="canvas"></canvas>
 		<div class="digCanvasContainer" ref="digCanvas"></div>
+		<div class="waveCanvasContainer" ref="waveCanvas"></div>
 	</div>
 </template>
 
@@ -42,8 +43,10 @@
 
 				// SAND VARIABLES - - - - -
 				const nbSubdivisions = 120;
-				const DIGCIRCLESIZE = 7;
-				const DIGCIRCLESIZEUP = 9;
+				// for canvas
+				const DIGCIRCLESIZE = 6;
+				// for uniformes
+				const DEEPMAX = 0.5;
 
 				let mouse = new THREE.Vector2();
 				
@@ -141,26 +144,17 @@
 				this.digCtx = this.digCanvas.getContext('2d');
 				this.digCanvas.width = 200;
 				this.digCanvas.height = 200;
-				// this.digCtx.fillStyle = "#FFFFFF";
-				// this.digCtx.fillRect(0,0,200,200);
-				
-
 				this.$refs.digCanvas.append(this.digCanvas);
 
-				const canvasTexture = new THREE.CanvasTexture(this.digCanvas);
+				const canvasDigTexture = new THREE.CanvasTexture(this.digCanvas);
+				
+				this.waveCanvas = document.createElement("canvas");
+				this.waveCtx = this.waveCanvas.getContext('2d');
+				this.waveCanvas.width = 200;
+				this.waveCanvas.height = 200;
+				this.$refs.waveCanvas.append(this.waveCanvas);
 
-
-
-
-
-
-
-
-
-
-
-
-
+				const canvasWaveTexture = new THREE.CanvasTexture(this.waveCanvas);
 
 				// SETUP
 				this.scene = new THREE.Scene();
@@ -171,27 +165,10 @@
 
 				const sandTextureNormal = textureLoader.load(`images/textures/sand${sandVersion}/Sand_00${sandVersion}_NRM.jpg`);
 				const sandTextureColor = textureLoader.load(`images/textures/sand${sandVersion}/Sand_00${sandVersion}_COLOR.jpg`);
-				const sandTextureDisp = textureLoader.load(`images/textures/sand${sandVersion}/Sand_00${sandVersion}_DISP.png`);
-				const sandTextureOcc = textureLoader.load(`images/textures/sand${sandVersion}/Sand_00${sandVersion}_OCC.jpg`);
-				const sandTextureSpec = textureLoader.load(`images/textures/sand1/Sand_001_SPEC.png`);
-
-				// const sandMaterial = new THREE.MeshStandardMaterial({
-				// 	map: sandTextureColor,
-				// 	aoMap: sandTextureOcc,
-				// 	normalMap: sandTextureNormal,
-				// 	specularMap: sandTextureSpec,
-				// 	displacementMap: sandTextureDisp,
-				// 	displacementScale: -0.1,
-				// 	// morphTargets: true,
-				// 	// wireframe: true
-				// });
-				const sandMaterial = new THREE.RawShaderMaterial({
+				
+				const sandMaterial = new THREE.ShaderMaterial({
 					vertexShader,
 					fragmentShader,
-					// side: THREE.DoubleSide,
-					// wireframe: true,
-					// transparent: true,
-					// flatShading: true,
 					uniforms: {
 						uFrequency: {
 							value: new THREE.Vector2(10, 5) 
@@ -199,7 +176,9 @@
 						uTime: { value: 0 },
 						uColor: { value: new THREE.Color("orange") },
 						uTexture: { value: sandTextureColor },
-						uCanvasTexture: { value: canvasTexture }
+						uCanvasDigTexture: { value: canvasDigTexture },
+						uCanvasWaveTexture: { value: canvasWaveTexture },
+						uDeepMax: { value: DEEPMAX }
 					}
 				});
 
@@ -209,6 +188,8 @@
 					sandGeometry,
 					sandMaterial
 				);
+
+				sandPlane.rotation.x = Math.PI / -2;
 
 				this.scene.add(sandPlane);
 
@@ -258,7 +239,7 @@
 				const aspectRatio = sizes.width / sizes.height;
 				const camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 100);
 				camera.position.z = 5;
-				camera.position.y = 1;
+				camera.position.y = 2;
 
 				this.scene.add(camera);
 
@@ -306,12 +287,14 @@
 
 						// const isHoveringScreen = intersects.filter(intersection => intersection.object.uuid === screen.uuid).length > 0;
 
-						const digData = intersects.filter(intersect => intersect.object.uuid === sandPlane.uuid)[0];
+						const intersectData = intersects.filter(intersect => intersect.object.uuid === sandPlane.uuid)[0];
 
 						// ici on va aller dessiner sur le digCanvas
-						if( digData ){
-							drawOnDigCanvas(digData.uv);
-							canvasTexture.needsUpdate = true;
+						if( intersectData ){
+							drawOnDigCanvas(intersectData.uv);
+							drawOnWaveCanvas(intersectData.uv, elapsedTime);
+							canvasDigTexture.needsUpdate = true;
+							canvasWaveTexture.needsUpdate = true;
 						}
 
 
@@ -328,20 +311,62 @@
 
 				tick();
 
+				// ce serait cool que le drawOnDigCanvas ne s'applique que quand la souris est en mouvement
+				// (pas à l'arret)
 				const drawOnDigCanvas = uv => {
 					const x = uv.x * this.digCanvas.width;
 					const y = (1 - uv.y) * this.digCanvas.height;
 
 					this.digCtx.save();
-					this.digCtx.fillStyle = "rgba(255,0,0,0.05)";
-					this.digCtx.strokeStyle = "rgba(0,255,0,0.005)";
+					this.digCtx.fillStyle = "rgba(255,0,0,0.009)";
 					this.digCtx.beginPath();
 					this.digCtx.ellipse(x, y, DIGCIRCLESIZE, DIGCIRCLESIZE, 0, 0, 2 * Math.PI);
 					this.digCtx.fill();
-					this.digCtx.strokeStyle = "rgba(0,255,0,0.01)";
-					this.digCtx.ellipse(x, y, DIGCIRCLESIZEUP, DIGCIRCLESIZEUP, 0, 0, 2 * Math.PI);
-					this.digCtx.stroke();
+					// this.digCtx.strokeStyle = "rgba(0,255,0,0.01)";
+					// this.digCtx.ellipse(x, y, DIGCIRCLESIZEUP, DIGCIRCLESIZEUP, 0, 0, 2 * Math.PI);
+					// this.digCtx.stroke();
 					this.digCtx.restore();
+
+				};
+
+				let previousTime = 0;
+
+				const drawOnWaveCanvas = (uv, time) => {
+					
+					const x = uv.x * this.waveCanvas.width;
+					const y = (1 - uv.y) * this.waveCanvas.height;
+
+					const timeDiff = previousTime - time;
+
+					if( timeDiff >= 0.5 ){
+
+						// ici on va chercher à déduire le sens du balayage
+						// grace à un différentiel de vecteurs
+						// entre le mouse.xy pris à previous time
+						// et le mouse.xy pris à time
+
+						// on pourra aussi déduire la vélocité 
+						// grâce à l'ampleur de ce différentiel
+
+
+
+						previousTime = time;
+
+					}
+
+
+
+
+
+					// this.waveCtx.save();
+					// this.waveCtx.fillStyle = "rgba(0,0,255,0.009)";
+					// this.waveCtx.beginPath();
+					// this.waveCtx.ellipse(x, y, DIGCIRCLESIZE, DIGCIRCLESIZE, 0, 0, 2 * Math.PI);
+					// this.waveCtx.fill();
+					// // this.waveCtx.strokeStyle = "rgba(0,255,0,0.01)";
+					// // this.waveCtx.ellipse(x, y, DIGCIRCLESIZEUP, DIGCIRCLESIZEUP, 0, 0, 2 * Math.PI);
+					// // this.waveCtx.stroke();
+					// this.waveCtx.restore();
 
 				};
 
@@ -390,6 +415,13 @@
 		top: 0;
 		left: 0;
 		border: solid 1px red;
+	}
+
+	.waveCanvasContainer {
+		position: fixed;
+		top: 200px;
+		left: 0;
+		border: solid 1px blue;
 	}
 
 

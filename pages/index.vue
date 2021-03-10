@@ -27,6 +27,8 @@
 			<nuxt-link to="/threejs-journey-20">threejs journey #20 : SHADERS with uniforms</nuxt-link>
 			<nuxt-link to="/threejs-journey-21">threejs journey #21 : Video + sand + particles</nuxt-link>
 			<nuxt-link to="/threejs-journey-22">threejs journey #22 : Video + sand + canvas drawing mouse</nuxt-link>
+			<nuxt-link to="/threejs-journey-23">threejs journey #23 : 50 shades of Shaders (patterns)</nuxt-link>
+			<nuxt-link to="/threejs-journey-24">threejs journey #24 : Shader : raging sea</nuxt-link>
 		</nav>
 	</div>
 </template>
