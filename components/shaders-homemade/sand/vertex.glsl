@@ -17,13 +17,21 @@ uniform sampler2D uCanvasWaveTexture;
 void main()
 {
 	vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-	float currentRedOnCanvas = texture2D(uCanvasDigTexture, uv).r;
-	float currentAlphaOnCanvas = texture2D(uCanvasDigTexture, uv).a;
-	float currentDignessImpact = currentRedOnCanvas * currentAlphaOnCanvas;
+	float digRed = texture2D(uCanvasDigTexture, uv).r;
+	float digAlpha = texture2D(uCanvasDigTexture, uv).a;
+	float currentDignessImpact = digRed * digAlpha;
+
+	float waveBlue = texture2D(uCanvasWaveTexture, uv).b;
+	float waveAlpha = texture2D(uCanvasWaveTexture, uv).a;
+	float currentWaveImpact = waveBlue * waveAlpha;
+
 
 	float amountToDig = min(currentDignessImpact, uDeepMax);
+	float amountToWave = currentWaveImpact * 0.15;
 
 	modelPosition.y -= amountToDig;
+
+	modelPosition.y += amountToWave;
 
 	vec4 viewPosition = viewMatrix * modelPosition;
 	vec4 projectedPosition = projectionMatrix * viewPosition;
