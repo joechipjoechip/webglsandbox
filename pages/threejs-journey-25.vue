@@ -424,8 +424,7 @@
 					depthPacking: THREE.RGBADepthPacking
 				});
 
-				// now let's fusion this standard material with our custom shader :
-
+				// now let's fusion this standard/phong material with our custom shader :
 				sandMaterial.onBeforeCompile = shader => {
 
 					shader.uniforms.uCanvasDigTexture = { value: canvasDigTexture };
