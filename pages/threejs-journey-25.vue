@@ -1,7 +1,9 @@
 <template>
 	<div>
 		<canvas class="webgl" ref="canvas"></canvas>
-		<div class="digCanvasContainer" ref="digCanvas"></div>
+		<div v-show="params.digInfos.displayCanvas" class="digCanvasContainer" ref="digCanvasContainer">
+			<canvas ref="digCanvas"></canvas>
+		</div>
 		<div class="waveCanvasContainer" ref="waveCanvas"></div>
 		<div class="videoControls" ref="videoControls" :active="userIsWatching">
 			<div class="left">
@@ -29,14 +31,44 @@
 
 	import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-	import vertexShader from "./../components/shaders-homemade/sand-fusion-standard/vertex.glsl";
-
-	import fragmentShader from "./../components/shaders-homemade/sand-fusion-standard/fragment.glsl";
-
 	export default {
 		data(){
 			return {
-				userIsWatching: false
+				userIsWatching: false,
+				params: {
+					lights: {
+						ambientLight: {
+							color: 0x000099,
+							intensity: 0.45
+						},
+						spotlight1: {
+							color: 0xaa00ff,
+							intensity: 1,
+							distance: 7,
+							angle: 1.12,
+							penumbra: 1,
+							decay: 0.2
+						},
+						spotlight2: {
+							color: 0x0000ff,
+							intensity: 1.75,
+							distance: 11,
+							angle: Math.PI * 0.3,
+							penumbra: 1,
+							decay: 1
+						}
+					},
+					digInfos: {
+						circleSizeInner: 1,
+						circleSizeOuter: 12,
+						impact: 0.03,
+						gradientAmount: 25,
+						displayCanvas: false
+					},
+					sandMaterial: {
+						specular: 0xffffff
+					}
+				}
 			};
 		},
 		mounted(){
@@ -188,28 +220,28 @@
 
 			},
 
-			onMouseWheel( event ){
+			// onMouseWheel( event ){
 
-				const deltaY = event.deltaY;
-				const deltaYsmooth = Math.abs(deltaY * 0.001);
+			// 	const deltaY = event.deltaY;
+			// 	const deltaYsmooth = Math.abs(deltaY * 0.001);
 
-				if( deltaY < 0 ){
-					// go up
-					this.updateCameraPosition("up", deltaYsmooth);
-				}
-				else {
-					// go down
-					this.updateCameraPosition("down", deltaYsmooth);
-				}
+			// 	if( deltaY < 0 ){
+			// 		// go up
+			// 		this.updateCameraPosition("up", deltaYsmooth);
+			// 	}
+			// 	else {
+			// 		// go down
+			// 		this.updateCameraPosition("down", deltaYsmooth);
+			// 	}
 
-			},
+			// },
 
 			updateLightPosition(uv){
 
-				// this.spotlight.position.x = (uv.x - 0.5) * (this.sandPlaneWidth / 2) * -1;
-				// this.spotlight.position.z = (uv.y - 0.5) * (this.sandPlaneWidth / 2);
+				// this.spotlight2.position.x = (uv.x - 0.5) * (this.sandPlaneWidth / 2) * -1;
+				// this.spotlight2.position.z = (uv.y - 0.5) * (this.sandPlaneWidth / 2);
 
-				this.spotlight.target.position.set(
+				this.spotlight1.target.position.set(
 					(uv.x - 0.5) * (this.sandPlaneWidth / 2),
 					this.screen.position.y,
 					(uv.y - 0.5) * (this.sandPlaneWidth / 2) * -1
@@ -270,11 +302,12 @@
 
 
 				// SAND VARIABLES - - - - -
-				const nbSubdivisions = 256;
+				const nbSubdivisions = 128;
 				// for canvas dig
-				const DIGCIRCLESIZE = 7;
+				const DIGCIRCLESIZEINNER = 2;
+				const DIGCIRCLESIZEOUTER = 12;
 				const DIGIMPACT = 4;
-				let GRADIENTDIGAMOUNT = 25;
+				let GRADIENTDIGAMOUNT = 0;
 
 				const SCREENLEVEL = -0.3;
 				// for uniformes
@@ -300,7 +333,6 @@
 
 				this.$refs.canvas.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				this.$refs.canvas.addEventListener( 'mouseout', onDocumentMouseLeave, false );
-				this.$refs.canvas.addEventListener( 'wheel', this.onMouseWheel, false );
 
 				this.$refs.canvas.addEventListener( 'click', this.onCanvasClick);
 
@@ -370,30 +402,28 @@
 					width: 400
 				});
 
-				const parameters = {};
-
 				const getRandom = (min, max) => {
 					return Math.random() * (max - min) + min;
 				};
 
 
 
-				// Canvas invisible qui va récup les position de la souris
-				this.digCanvas = document.createElement("canvas");
+				// Canvas qui va récup les position de la souris
+				this.digCanvas = this.$refs.digCanvas;
 				this.digCtx = this.digCanvas.getContext('2d');
 				this.digCanvas.width = 200;
 				this.digCanvas.height = 200;
-				this.$refs.digCanvas.append(this.digCanvas);
+				// this.$refs.digCanvasContainer.append(this.digCanvas);
 
 				const canvasDigTexture = new THREE.CanvasTexture(this.digCanvas);
 				
-				this.waveCanvas = document.createElement("canvas");
-				this.waveCtx = this.waveCanvas.getContext('2d');
-				this.waveCanvas.width = 200;
-				this.waveCanvas.height = 200;
-				this.$refs.waveCanvas.append(this.waveCanvas);
+				// this.waveCanvas = document.createElement("canvas");
+				// this.waveCtx = this.waveCanvas.getContext('2d');
+				// this.waveCanvas.width = 200;
+				// this.waveCanvas.height = 200;
+				// // this.$refs.waveCanvas.append(this.waveCanvas);
 
-				const canvasWaveTexture = new THREE.CanvasTexture(this.waveCanvas);
+				// const canvasWaveTexture = new THREE.CanvasTexture(this.waveCanvas);
 
 				// SETUP
 				this.scene = new THREE.Scene();
@@ -416,7 +446,7 @@
 					roughnessMap: sandTextureRoughness,
 					displacementMap: sandTextureDisp,
 					displacementScale: this.displacementScale,
-					specular: 0xffffff,
+					specular: this.params.sandMaterial.specular,
 					specularMap: sandTextureSpec
 				});
 
@@ -586,19 +616,44 @@
 
 
 				// Lights
-				this.ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+				this.ambientLight = new THREE.AmbientLight(
+					this.params.lights.ambientLight.color, 
+					this.params.lights.ambientLight.intensity
+				);
+
 				this.scene.add(this.ambientLight);
 
-				this.spotlight = new THREE.SpotLight(0xffffff, 1, 10, Math.PI * 0.2, 1, 0.5);
-				this.spotlight.position.y = 3;
+				this.spotlight1 = new THREE.SpotLight(
+					this.params.lights.spotlight1.color, 
+					this.params.lights.spotlight1.intensity, 
+					this.params.lights.spotlight1.length, 
+					this.params.lights.spotlight1.angle, 
+					this.params.lights.spotlight1.penumbra, 
+					this.params.lights.spotlight1.decay
+				);
+
+				this.spotlight1.position.y = 3;
+
+				this.scene.add(this.spotlight1);
+
+				this.scene.add(this.spotlight1.target);
+
+				this.spotlight2 = new THREE.SpotLight(
+					this.params.lights.spotlight2.color, 
+					this.params.lights.spotlight2.intensity, 
+					this.params.lights.spotlight2.length, 
+					this.params.lights.spotlight2.angle, 
+					this.params.lights.spotlight2.penumbra, 
+					this.params.lights.spotlight2.decay
+				);
+
+				this.spotlight2.position.y = 0.5;
+				this.spotlight2.position.z = 5.5;
+
+				this.scene.add(this.spotlight2);
 
 				// this.spotlightHelper = new THREE.SpotLightHelper(this.spotlight);
 				// this.scene.add(this.spotlightHelper);
-
-				
-
-				this.scene.add(this.spotlight);
-				this.scene.add(this.spotlight.target);
 
 				// RAYCASTER
 				const raycaster = new THREE.Raycaster();
@@ -645,7 +700,8 @@
 
 					oldElapsedTime = elapsedTime;
 
-					checkIfCameraNeedToMove(mouse);
+					// suspended :
+					// checkIfCameraNeedToMove(mouse);
 
 					// sans ce .update() , le damping ne fonctionnera pas ! 
 					controls.update();
@@ -695,8 +751,6 @@
 
 				};
 
-				
-
 				let lastUv = { x: 0.000, y: 0.000 };
 
 				const drawOnDigCanvas = (uv, isHoveringScreen) => {
@@ -708,14 +762,20 @@
 
 						const x = uv.x * this.digCanvas.width;
 						const y = (1 - uv.y) * this.digCanvas.height;
-						const opacity = isHoveringScreen ? 0.06 : 0.03;
-						
-						GRADIENTDIGAMOUNT = this.digCtx.createRadialGradient(x, y, 1, x, y, 15);
-						GRADIENTDIGAMOUNT.addColorStop(0, `rgba(255,0,0, ${opacity}`);
-						GRADIENTDIGAMOUNT.addColorStop(1, 'rgba(255,0,0, 0.0)');
+						const opacity = isHoveringScreen ? this.params.digInfos.impact * 2 : this.params.digInfos.impact;
 
-						this.digCtx.arc(x, y, 15, 0, 2 * Math.PI);
-						this.digCtx.fillStyle = GRADIENTDIGAMOUNT;
+						this.params.digInfos.gradientAmount = this.digCtx.createRadialGradient(
+							x, y, 
+							this.params.digInfos.circleSizeInner, 
+							x, y, 
+							this.params.digInfos.circleSizeOuter
+						);
+
+						this.params.digInfos.gradientAmount.addColorStop(0, `rgba(255,0,0, ${opacity}`);
+						this.params.digInfos.gradientAmount.addColorStop(1, 'rgba(255,0,0, 0.0)');
+
+						this.digCtx.arc(x, y, this.params.digInfos.circleSizeOuter, 0, Math.PI * 2);
+						this.digCtx.fillStyle = this.params.digInfos.gradientAmount;
 						this.digCtx.fill();
 
 						lastUv = uv;
@@ -821,15 +881,7 @@
 
 					}
 
-
-
-
-
-
-
 				};
-
-				
 
 				const hoveringScreenCounter = isHovering => {
 
@@ -853,50 +905,178 @@
 
 				};
 
-				const checkIfCameraNeedToMove = cursor => {
+				// suspended : (quand la mouse s'approche des bords d'écran on décale la cam)
+				// const checkIfCameraNeedToMove = cursor => {
 
-					let movePower = 1;
+				// 	let movePower = 1;
 
-					if( cursor.x > cameraMoveThreshol ){
+				// 	if( cursor.x > cameraMoveThreshol ){
 
-						movePower =  Math.abs(cursor.x - cameraMoveThreshol);
+				// 		movePower =  Math.abs(cursor.x - cameraMoveThreshol);
 
-						this.updateCameraPosition("right", 0.1 * movePower);
+				// 		this.updateCameraPosition("right", 0.1 * movePower);
 
-					} 
+				// 	} 
 
-					if( cursor.x < -cameraMoveThreshol ){
+				// 	if( cursor.x < -cameraMoveThreshol ){
 
-						movePower =  Math.abs(cursor.x + cameraMoveThreshol);
+				// 		movePower =  Math.abs(cursor.x + cameraMoveThreshol);
 
-						this.updateCameraPosition("left", 0.1 * movePower);
+				// 		this.updateCameraPosition("left", 0.1 * movePower);
 
-					}
+				// 	}
 
-					if( cursor.y > cameraMoveThreshol ){
+				// 	if( cursor.y > cameraMoveThreshol ){
 
-						movePower =  Math.abs(cursor.y - cameraMoveThreshol) * 2;
+				// 		movePower =  Math.abs(cursor.y - cameraMoveThreshol) * 2;
 
-						this.updateCameraPosition("up", 0.1 * movePower);
+				// 		this.updateCameraPosition("up", 0.1 * movePower);
 
-					} 
+				// 	} 
 
-					if( cursor.y < -cameraMoveThreshol ){
+				// 	if( cursor.y < -cameraMoveThreshol ){
 
-						movePower =  Math.abs(cursor.x - cameraMoveThreshol) / 2;
+				// 		movePower =  Math.abs(cursor.x - cameraMoveThreshol) / 2;
 
-						this.updateCameraPosition("down", 0.1 * movePower);
+				// 		this.updateCameraPosition("down", 0.1 * movePower);
 
-					}
+				// 	}
 
 
-				};
+				// };
 
 				gui
 					.add(this.animation, "run")
 					.name("run animation");
 
+			
+				const guiSpotLight = (elementName) => {
 
+					const folder = gui.addFolder(elementName);
+
+					folder
+						.addColor(this.params.lights[elementName], "color")
+						.onChange(() => {
+							this[elementName].color.set(this.params.lights[elementName].color);
+						})
+						.name("color");
+
+					folder
+						.add(this.params.lights[elementName], "intensity")
+						.min(0).max(2).step(0.01)
+						.onChange(() => {
+							this[elementName].intensity = this.params.lights[elementName].intensity;
+						})
+						.name("intensity");
+						
+					folder
+						.add(this.params.lights[elementName], "distance")
+						.min(0).max(10).step(0.01)
+						.onChange(() => {
+							this[elementName].distance = this.params.lights[elementName].distance;
+						})
+						.name("distance");
+
+					folder
+						.add(this.params.lights[elementName], "angle")
+						.min(Math.PI * -0.5).max(Math.PI * 0.5).step(0.01)
+						.onChange(() => {
+							this[elementName].angle = this.params.lights[elementName].angle;
+						})
+						.name("angle");
+
+					folder
+						.add(this.params.lights[elementName], "penumbra")
+						.min(0).max(1).step(0.01)
+						.onChange(() => {
+							this[elementName].penumbra = this.params.lights[elementName].penumbra;
+						})
+						.name("penumbra");
+
+				};
+
+				const guiAmbientLight = (elementName) => {
+
+					const folder = gui.addFolder(elementName);
+
+					folder
+						.addColor(this.params.lights[elementName], "color")
+						.onChange(() => {
+							this[elementName].color.set(this.params.lights[elementName].color);
+						})
+						.name("color");
+
+					folder
+						.add(this.params.lights[elementName], "intensity")
+						.min(0).max(2).step(0.01)
+						.onChange(() => {
+							this[elementName].intensity = this.params.lights[elementName].intensity;
+						})
+						.name("intensity");
+
+				};
+
+				const guiDig = () => {
+
+					const folder = gui.addFolder("Dig Infos");
+
+					folder
+						.add(this.params.digInfos, "circleSizeInner")
+						.min(0).max(2).step(0.01)
+						.name("circleSizeInner");
+
+					folder
+						.add(this.params.digInfos, "circleSizeOuter")
+						.min(0).max(20).step(0.01)
+						.name("circleSizeOuter");
+
+					folder
+						.add(this.params.digInfos, "impact")
+						.min(0).max(0.2).step(0.01)
+						.name("impact");
+
+					folder
+						.add(this.params.digInfos, "gradientAmount")
+						.min(15).max(35).step(0.1)
+						.name("gradientAmount");
+
+					folder
+						.add(this.params.digInfos, "displayCanvas")
+						.name("display canvas");
+
+				};
+
+				const guiSandMaterial = () => {
+
+					const folder = gui.addFolder("sand material");
+
+					folder
+						.addColor(this.params.sandMaterial, "specular")
+						.onChange(() => {
+							this.sandPlane.material.specular = new THREE.Color(this.params.sandMaterial.specular);
+						})
+						.name("specular");
+
+				};
+
+
+				// Add gui's
+				const guiManager = () => {
+
+					guiAmbientLight("ambientLight");
+
+					guiSpotLight("spotlight1");
+					guiSpotLight("spotlight2");
+
+					guiDig();
+					guiSandMaterial();
+
+				};
+
+				guiManager();
+
+				
+				// and launch
 				tick();
 
 			}
@@ -937,9 +1117,9 @@
 
 	.digCanvasContainer {
 		position: fixed;
-		top: 0;
-		left: 0;
-		border: solid 1px red;
+		top: 10px;
+		left: 10px;
+		border: dashed 1px rgba(255,255,255,0.3);
 	}
 
 	.waveCanvasContainer {
