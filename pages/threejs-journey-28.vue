@@ -21,6 +21,10 @@
 
 	import firefliesFragmentShader from "./../components/shaders-homemade/fireflies/fragment.glsl";
 
+	import portalVertexShader from "./../components/shaders-homemade/portal/vertex.glsl";
+
+	import portalFragmentShader from "./../components/shaders-homemade/portal/fragment.glsl";
+
 
 	export default {
 		mounted(){
@@ -70,6 +74,9 @@
 					// renderer.setPixelRatio(window.devicePixelRatio);
 					// on limite le pixelratio à 2 pour garder de la perf
 					renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+					// update fireflies material
+					firefliesMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
 
 				});
 
@@ -159,7 +166,22 @@
 
 				// pole lamp material
 				const poleLightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffe5 });
-				const portalMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+				// Portal
+
+				debugObject.portalColorStart = "#cb00ff";
+				debugObject.portalColorEnd = "#FFFFFF";
+
+				const portalMaterial = new THREE.ShaderMaterial({
+					uniforms: {
+						uTime: { value: 0 },
+						uColorStart: { value: new THREE.Color(debugObject.portalColorStart) },
+						uColorEnd: { value: new THREE.Color(debugObject.portalColorEnd) }
+					},
+					vertexShader: portalVertexShader,
+					fragmentShader: portalFragmentShader
+				});
+
 
 
 				// MODEL
@@ -179,11 +201,11 @@
 						// mais maintenant que tous les models sont fusionnés en une seul géometry :
 						const bigGeometry = gltf.scene.children.find(child => child.name === "merged");
 
-						const poleLight1Mesh = gltf.scene.children.find((child) => child.name === "poleLight1");
+						const poleLight1Mesh = gltf.scene.children.find(child => child.name === "poleLight1");
 
-						const poleLight2Mesh = gltf.scene.children.find((child) => child.name === "poleLight2");
+						const poleLight2Mesh = gltf.scene.children.find(child => child.name === "poleLight2");
 
-						const portalMesh = gltf.scene.children.find((child) => child.name === "portalCircleCircle");
+						const portalMesh = gltf.scene.children.find(child => child.name === "portalCircleCircle");
 
 						bigGeometry.material = bakedMaterial;
 
@@ -197,30 +219,55 @@
 					}
 				);
 
-				// fireflies
+
+				// FIREFLIES
 				// geo
 				const firefliesGeometry = new THREE.BufferGeometry();
 				const firefliesCount = 30;
 				const positionArray = new Float32Array(firefliesCount * 3);
+				const scaleArray = new Float32Array(firefliesCount);
 
 				for(let i = 0; i < firefliesCount; i++){
+
 					positionArray[i * 3 + 0] = (Math.random() - 0.5) * 4;
 					positionArray[i * 3 + 1] = Math.random() * 4;
 					positionArray[i * 3 + 2] = (Math.random() - 0.5) * 4;
+
+					scaleArray[i] = Math.random();
+
 				}
 
+
 				firefliesGeometry.setAttribute("position", new THREE.BufferAttribute(positionArray, 3));
+				firefliesGeometry.setAttribute("aScale", new THREE.BufferAttribute(scaleArray, 1));
 
 				// material
 				const firefliesMaterial = new THREE.ShaderMaterial({
+					uniforms: {
+						uTime: { value: 0 },
+						uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+						uSize: { value: 100 },
+					},
 					vertexShader: firefliesVertexShader,
-					fragmentShader: firefliesFragmentShader
+					fragmentShader: firefliesFragmentShader,
+					transparent: true,
+					// attention : pas bon pour les perfs, mais joli
+					// (va mixer la couleur des fireflies avec la couleur de ce qui se trouve derrière)
+					blending: THREE.AdditiveBlending,
+					// depthWrite:false va permettre d'obtenir la transparence des particules entre elles
+					// (qu'elles ne se cachent pas les unes les autres)
+					depthWrite: false
 				});
 
 				// points
 				const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial);
 
-				// scene.add(fireflies);
+				scene.add(fireflies);
+
+
+
+
+				// PORTAL
 
 
 
@@ -263,6 +310,31 @@
 						renderer.setClearColor(debugObject.clearColor);
 						
 					});
+
+				gui
+					.add(firefliesMaterial.uniforms.uSize, "value")
+					.min(0)
+					.max(500)
+					.step(1)
+					.name("fireflies size");
+
+				gui
+					.addColor(debugObject, "portalColorStart")
+					.onChange(() => {
+
+						portalMaterial.uniforms.uColorStart.value.set(debugObject.portalColorStart)
+
+					})
+					.name("portal color start");
+
+				gui
+					.addColor(debugObject, "portalColorEnd")
+					.onChange(() => {
+
+						portalMaterial.uniforms.uColorEnd.value.set(debugObject.portalColorEnd)
+
+					})
+					.name("portal color End");
 				
 
 
@@ -287,12 +359,14 @@
 
 					const elapsedTime = clock.getElapsedTime();
 
+					// update dynamic values for shaders : 
+					firefliesMaterial.uniforms.uTime.value = elapsedTime;
+					portalMaterial.uniforms.uTime.value = elapsedTime;
+
 					// sans ce .update() , le damping ne fonctionnera pas ! 
 					controls.update();
 
 					renderer.render(scene, camera);
-
-					console.log("requestAnim is triggerd");
 
 					this.animation.run && window.requestAnimationFrame(tick);
 
