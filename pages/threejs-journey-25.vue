@@ -804,7 +804,7 @@
 
 						const timeDiff = currentTime - previousTime;
 	
-						// d=√((x_2-x_1)²+(y_2-y_1)²) 
+						// d = √((x_2-x_1)²+(y_2-y_1)²) 
 						// const distance = Math.sqrt(Math.pow(uv.x - previousUv.x, 2) + Math.pow(uv.y - previousUv.y, 2));
 						// const velocity = (distance / timeDiff) * 10;
 						this.velocity = (Math.sqrt(Math.pow(uv.x - previousUv.x, 2) + Math.pow(uv.y - previousUv.y, 2)) / timeDiff) * 10;

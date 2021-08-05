@@ -556,6 +556,8 @@
 
 					}
 
+					console.log("sandplane : ", this.sandPlane);
+
 					// NOW COMPUTE RENDER
 					renderer.render(this.scene, this.camera);
 

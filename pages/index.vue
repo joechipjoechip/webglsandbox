@@ -30,6 +30,9 @@
 			<nuxt-link to="/threejs-journey-23">threejs journey #23 : 50 shades of Shaders (patterns)</nuxt-link>
 			<nuxt-link to="/threejs-journey-24">threejs journey #24 : Shader : raging sea</nuxt-link>
 			<nuxt-link to="/threejs-journey-25">threejs journey #25 : Hooking custom shader with standard shader</nuxt-link>
+			<nuxt-link to="/threejs-journey-26">threejs journey #26 : Imported model & realistic render</nuxt-link>
+			<nuxt-link to="/threejs-journey-27">threejs journey #27 : post processing</nuxt-link>
+			<nuxt-link to="/threejs-journey-28">threejs journey #28 : importer un model blender baked</nuxt-link>
 		</nav>
 	</div>
 </template>

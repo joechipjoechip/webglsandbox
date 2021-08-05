@@ -11,9 +11,6 @@ varying float vDigness;
 uniform sampler2D uCanvasDigTexture;
 uniform sampler2D uCanvasWaveTexture;
 
-
-
-
 void main()
 {
 	vec4 modelPosition = modelMatrix * vec4(position, 1.0);
